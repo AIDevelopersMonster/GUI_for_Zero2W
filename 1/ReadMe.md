@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
 
 Для наглядности, вот как это может выглядеть на макетной плате:
 
------<img  alt="Физическая схема на макетной плате" src="1/breadboard_fritzing.png />
+<img  alt="Физическая схема на макетной плате" src="1/breadboard_fritzing.png" />
 
 -----
 
