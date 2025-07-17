@@ -19,7 +19,7 @@
 
 Для работы примера необходимо правильно подключить светодиод к Raspberry Pi. Обязательно используйте **резистор** (например, 220 Ом) последовательно со светодиодом, чтобы ограничить ток и предотвратить повреждение светодиода и вашего Pi.
 
-<img  alt="Схема подключения" src="https://github.com/AIDevelopersMonster/GUI_for_Zero2W/blob/main/1/breadboard_fritzing.png" />
+<img  alt="Схема подключения" src="https://github.com/AIDevelopersMonster/GUI_for_Zero2W/blob/main/1/led_circuit_diagram.png" />
 
 **Подключение:**
 
