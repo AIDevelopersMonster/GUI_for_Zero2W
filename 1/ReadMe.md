@@ -175,10 +175,10 @@ int main(int argc, char *argv[]) {
 
 Для наглядности, вот как это может выглядеть на макетной плате:
 
-<img  alt="Физическая схема на макетной плате" src="1/breadboard_fritzing.png" />
+<img  alt="Физическая схема на макетной плате" src="https://github.com/AIDevelopersMonster/GUI_for_Zero2W/blob/main/1/breadboard_fritzing.png" />
 
 -----
-
+http://dochub.local/GUI_for_Zero2W/_images/breadboard_fritzing.png
 ## Создание ярлыка на рабочем столе
 
 Чтобы ваше приложение было удобно запускать, вы можете создать ярлык на рабочем столе или в меню приложений.
