@@ -175,6 +175,8 @@ int main(int argc, char *argv[]) {
 
 Для наглядности, вот как это может выглядеть на макетной плате:
 
+-----<img  alt="Физическая схема на макетной плате" src="1/breadboard_fritzing.png />
+
 -----
 
 ## Создание ярлыка на рабочем столе
@@ -222,7 +224,7 @@ int main(int argc, char *argv[]) {
 
 Вы можете использовать любую иконку. Вот пример иконки, которую можно использовать:
 
------<img width="1024" height="1024" alt="icon" src="https://github.com/user-attachments/assets/ba9719e3-e7b7-4b11-9d62-b2a1055f7881" />
+-----<img width="64" height="64" alt="icon" src="https://github.com/user-attachments/assets/ba9719e3-e7b7-4b11-9d62-b2a1055f7881" />
 
 
 ## Заключение
