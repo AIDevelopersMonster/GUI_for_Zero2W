@@ -222,7 +222,8 @@ int main(int argc, char *argv[]) {
 
 Вы можете использовать любую иконку. Вот пример иконки, которую можно использовать:
 
------
+-----<img width="1024" height="1024" alt="icon" src="https://github.com/user-attachments/assets/ba9719e3-e7b7-4b11-9d62-b2a1055f7881" />
+
 
 ## Заключение
 
