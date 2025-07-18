@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Глава 2: Реакция на кнопку и тревожный индикатор &mdash; документация GUI_for_Zero2W 0.1</title>
+      <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../static/css/theme.css" type="text/css" />
+  
+        <script data-url_root="../" id="documentation_options" src="../static/documentation_options.js"></script>
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/sphinx_highlight.js"></script>
+        <script src="../static/translations.js"></script>
+    <script src="../static/js/theme.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
+    <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="prev" title="Глава 1: Начало работы" href="../chapter01/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GUI_for_Zero2W
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Меню навигации">
+              <p class="caption" role="heading"><span class="caption-text">Содержание:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../chapter01/index.html">Глава 1: Начало работы</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Глава 2: Реакция на кнопку и тревожный индикатор</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">Введение</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">Подключение компонентов</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pull-up-pull-down">Подтяжка (Pull-up/Pull-down) резисторы</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">Принцип работы</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">Интерфейс</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">Код</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Меню навигации для мобильных устройств" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GUI_for_Zero2W</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Навигация по страницам">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Глава 2: Реакция на кнопку и тревожный индикатор</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../sources/chapter02/index.rst.txt" rel="nofollow"> Просмотреть исходный код страницы</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>Глава 2: Реакция на кнопку и тревожный индикатор<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h1>
+<p>В этой главе мы расширим функциональность нашего GUI-приложения для Raspberry Pi Zero 2 W. Мы добавим интерактивность с физической кнопкой, подключенной к GPIO, и реализуем систему тревожного оповещения, которая будет активироваться как по нажатию физической кнопки, так и через кнопку в графическом интерфейсе.</p>
+<p>—</p>
+<section id="id2">
+<h2>Введение<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
+<p>Наше приложение теперь будет выполнять следующие действия при активации тревоги:</p>
+<ul class="simple">
+<li><p>Светодиод, подключенный к Raspberry Pi, начнет мигать.</p></li>
+<li><p>В окне графического интерфейса появится мигающая надпись <strong>ТРЕВОГА</strong>.</p></li>
+<li><p>В интерфейс будет добавлена специальная кнопка для ручного управления состоянием тревоги (включение/отключение).</p></li>
+</ul>
+<p>—</p>
+</section>
+<section id="id3">
+<h2>Подключение компонентов<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h2>
+<p>Для этой главы нам понадобятся следующие компоненты и их подключение к Raspberry Pi:</p>
+<ul class="simple">
+<li><p><strong>Светодиод с резистором 220 Ом</strong>: Подключается к <strong>GPIO17 (пин 11)</strong>. Это тот же светодиод, что и в Главе 1.</p></li>
+<li><p><strong>Кнопка</strong>: Подключается к <strong>GPIO18 (пин 12)</strong>. Для кнопки используется схема с подтяжкой к питанию (pull-up) и подтяжкой к земле (pull-down) с помощью двух резисторов по 10 кОм.</p></li>
+</ul>
+<p>Ниже представлена схема подключения кнопки и светодиода:</p>
+<img alt="Схема подключения кнопки и светодиода" class="align-center" src="../images/chapter02_schematic.png" />
+<p><strong>Схема подключения кнопки к GPIO18 (с подтяжкой):</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+3.3V
+  │
+  [10k] (Pull-up резистор)
+  │
+  ├──────&gt; GPIO18
+  │
+┌──┴──┐
+│ BTN │
+└──┬──┘
+  │
+ GND
+</pre></div>
+</div>
+<p>—</p>
+<p><em>Примечание: Эта схема обеспечивает четкое состояние пина GPIO18 (либо HIGH, либо LOW) независимо от того, нажата кнопка или нет, предотвращая «плавающее» состояние.</em></p>
+<p>—</p>
+</section>
+<section id="pull-up-pull-down">
+<h2>Подтяжка (Pull-up/Pull-down) резисторы<a class="headerlink" href="#pull-up-pull-down" title="Permalink to this heading"></a></h2>
+<p>При работе с цифровыми входами микроконтроллеров, таких как GPIO на Raspberry Pi, часто возникает проблема «плавающего» состояния (floating state). Это происходит, когда входной пин не подключен ни к источнику питания (HIGH), ни к земле (LOW) напрямую. В таком состоянии пин может «ловить» электрические шумы из окружающей среды, что приводит к непредсказуемым и ложным срабатываниям.</p>
+<p>Для решения этой проблемы используются <strong>подтягивающие (pull-up)</strong> или <strong>стягивающие (pull-down)</strong> резисторы.</p>
+<ul>
+<li><dl class="simple">
+<dt><strong>Подтягивающий (Pull-up) резистор</strong>:</dt><dd><p>Подключается между входным пином и источником питания (например, +3.3V). Его функция — «подтягивать» напряжение на пине к высокому логическому уровню (HIGH), когда кнопка не нажата (цепь разомкнута). При нажатии кнопки, которая соединяет пин с землей, напряжение на пине становится низким (LOW).</p>
+<ul class="simple">
+<li><p><strong>Схема подключения:</strong></p></li>
+<li><p>Резистор (например, 10 кОм) подключается между <strong>GPIO-пином</strong> и <strong>источником питания (+3.3V)</strong>.</p></li>
+<li><p>Кнопка подключается между <strong>GPIO-пином</strong> и <strong>землей (GND)</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><strong>Визуальная схема:</strong></p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+3.3V
+  │
+  [10k] (Pull-up резистор)
+  │
+  ├──────&gt; GPIO-пин
+  │
+┌──┴──┐
+│ BTN │
+└──┬──┘
+  │
+ GND
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><dl class="simple">
+<dt><strong>Логика работы:</strong></dt><dd><ul class="simple">
+<li><p><strong>Кнопка не нажата:</strong> Пин GPIO «подтянут» к +3.3V через резистор. Микроконтроллер считывает <strong>HIGH (логическую «1»)</strong>.</p></li>
+<li><p><strong>Кнопка нажата:</strong> Кнопка замыкает пин на GND. Напряжение на пине падает до 0V. Микроконтроллер считывает <strong>LOW (логический «0»)</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Особенности:</strong></dt><dd><ul class="simple">
+<li><p>При нажатии кнопки через резистор протекает небольшой ток (например, 3.3V / 10 кОм = 0.33 мА).</p></li>
+<li><p>Это <strong>наиболее распространенный вариант</strong> подключения кнопок.</p></li>
+<li><p>Многие микроконтроллеры (включая Raspberry Pi) имеют <strong>встроенные программно-активируемые pull-up резисторы</strong>, что позволяет вообще не использовать внешний резистор для этой цели.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>—</p>
+<ul>
+<li><dl class="simple">
+<dt><strong>Стягивающий (Pull-down) резистор</strong>:</dt><dd><p>Подключается между входным пином и землей (GND). Его функция — «стягивать» напряжение на пине к низкому логическому уровню (LOW), когда кнопка не нажата. При нажатии кнопки, которая соединяет пин с источником питания, напряжение на пине становится высоким (HIGH).</p>
+<ul class="simple">
+<li><p><strong>Схема подключения:</strong></p></li>
+<li><p>Резистор (например, 10 кОм) подключается между <strong>GPIO-пином</strong> и <strong>землей (GND)</strong>.</p></li>
+<li><p>Кнопка подключается между <strong>GPIO-пином</strong> и <strong>источником питания (+3.3V)</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><strong>Визуальная схема:</strong></p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+3.3V
+  │
+┌──┴──┐
+│ BTN │
+└──┬──┘
+  │
+  ├──────&gt; GPIO-пин
+  │
+  [10k] (Pull-down резистор)
+  │
+ GND
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><dl class="simple">
+<dt><strong>Логика работы:</strong></dt><dd><ul class="simple">
+<li><p><strong>Кнопка не нажата:</strong> Пин GPIO «стянут» к GND через резистор. Микроконтроллер считывает <strong>LOW (логический «0»)</strong>.</p></li>
+<li><p><strong>Кнопка нажата:</strong> Кнопка замыкает пин на +3.3V. Напряжение на пине поднимается до +3.3V. Микроконтроллер считывает <strong>HIGH (логическую «1»)</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Зачем они нужны с кнопками?</strong>
+Кнопка — это механический переключатель. Когда кнопка не нажата, цепь разомкнута. Без подтягивающего или стягивающего резистора, входной пин GPIO в этот момент будет находиться в неопределенном состоянии. Микроконтроллер не сможет надежно определить, является ли это состояние логическим HIGH или LOW, что приведет к нестабильной работе и ложным срабатываниям (так называемому «дребезгу» контактов или случайным переключениям).</p>
+<p>В нашей схеме для кнопки на GPIO18 используется pull-up к +3.3V. Это обеспечивает четкий логический уровень на пине GPIO18 в обоих состояниях кнопки:
+* Когда кнопка <strong>не нажата</strong>, пин GPIO18 подтягивается к HIGH (+3.3V).
+* Когда кнопка <strong>нажата</strong>, она замыкает пин GPIO18 на GND, и пин переходит в состояние LOW (0V).</p>
+<p>Таким образом, мы всегда имеем определенное состояние на входе GPIO, что делает считывание кнопки надежным.</p>
+<p>—</p>
+</section>
+<section id="id4">
+<h2>Принцип работы<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h2>
+<p>Логика работы приложения будет следующей:</p>
+<ol class="arabic simple">
+<li><p><strong>Светодиод</strong> продолжает использоваться с предыдущей главы и подключен к <strong>GPIO17</strong>.</p></li>
+<li><p><strong>Кнопка</strong> подключена к <strong>GPIO18</strong>.</p></li>
+<li><p><strong>При нажатии физической кнопки</strong>:
+* Если тревога неактивна, она <strong>активируется</strong>.
+* Светодиод начинает мигать.
+* На экране появляется мигающий лейбл <strong>ТРЕВОГА</strong>.</p></li>
+<li><p><strong>Кнопка в графическом интерфейсе</strong> позволяет <strong>отключать и включать тревогу вручную</strong>, независимо от состояния физической кнопки.</p></li>
+<li><p><strong>Окно GTK+3</strong> будет обновляться с помощью таймеров для реализации мигания светодиода и текста.</p></li>
+</ol>
+<p>—</p>
+</section>
+<section id="id5">
+<h2>Интерфейс<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h2>
+<p>Графический интерфейс будет включать два основных элемента:</p>
+<ul class="simple">
+<li><p><strong>Кнопка</strong>: С текстом «Включить тревогу» или «Отключить тревогу» в зависимости от текущего состояния.</p></li>
+<li><p><strong>Мигающий лейбл</strong>: Отображает текст «<strong>⚠ ТРЕВОГА ⚠</strong>» при активной тревоге и исчезает, когда тревога неактивна.</p></li>
+</ul>
+<p>Вот как может выглядеть макет GUI:</p>
+<img alt="GUI с тревогой" class="align-center" src="../images/chapter02_gui_mockup.png" />
+<p>—</p>
+</section>
+<section id="id6">
+<h2>Код<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h2>
+<p>Ниже представлен полный C-код для реализации описанной функциональности.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;gtk/gtk.h&gt;</span><span class="c1">       // Основная библиотека GTK для создания графического интерфейса</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;gpiod.h&gt;</span><span class="c1">         // Библиотека libgpiod для взаимодействия с GPIO</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span><span class="c1">         // Стандартная библиотека ввода/вывода (например, для perror)</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span><span class="c1">        // Стандартная библиотека для общих утилит</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdbool.h&gt;</span><span class="c1">       // Для использования булевых типов (true/false)</span>
+
+<span class="c1">// Определение констант для удобства</span>
+<span class="cp">#define CONSUMER &quot;GUI_for_Zero2W&quot; </span><span class="c1">// Имя потребителя для линий GPIO</span>
+<span class="cp">#define CHIPNAME &quot;gpiochip0&quot;      </span><span class="c1">// Имя GPIO-чипа на Raspberry Pi</span>
+<span class="cp">#define LED_GPIO 17               </span><span class="c1">// Номер GPIO-пина для светодиода</span>
+<span class="cp">#define BUTTON_GPIO 18            </span><span class="c1">// Номер GPIO-пина для кнопки</span>
+
+<span class="c1">// Структура для хранения указателей на виджеты и состояния приложения</span>
+<span class="c1">// Эта структура будет передаваться между функциями через gpointer user_data</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">app_widgets</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">button_toggle_alarm</span><span class="p">;</span><span class="w"> </span><span class="c1">// Указатель на кнопку GTK для управления тревогой</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">label_alarm</span><span class="p">;</span><span class="w">         </span><span class="c1">// Указатель на лейбл GTK для отображения текста &quot;ТРЕВОГА&quot;</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">gpiod_line</span><span class="w"> </span><span class="o">*</span><span class="n">led_line</span><span class="p">;</span><span class="w">    </span><span class="c1">// Указатель на линию GPIO для светодиода</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">gpiod_line</span><span class="w"> </span><span class="o">*</span><span class="n">button_line</span><span class="p">;</span><span class="w"> </span><span class="c1">// Указатель на линию GPIO для кнопки</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">alarm_active</span><span class="p">;</span><span class="w">              </span><span class="c1">// Флаг: true, если тревога активна; false, если нет</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">led_on</span><span class="p">;</span><span class="w">                    </span><span class="c1">// Флаг: true, если светодиод включен; false, если выключен (для мигания)</span>
+<span class="w">    </span><span class="n">guint</span><span class="w"> </span><span class="n">blink_timer</span><span class="p">;</span><span class="w">              </span><span class="c1">// Идентификатор таймера для мигания (0, если таймер не активен)</span>
+<span class="w">    </span><span class="n">guint</span><span class="w"> </span><span class="n">poll_timer</span><span class="p">;</span><span class="w">               </span><span class="c1">// Идентификатор таймера для опроса кнопки (0, если таймер не активен)</span>
+<span class="p">};</span>
+
+<span class="c1">// Функция, вызываемая по таймеру для мигания светодиода и текста тревоги</span>
+<span class="n">gboolean</span><span class="w"> </span><span class="nf">blink_led</span><span class="p">(</span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">app_widgets</span><span class="w"> </span><span class="o">*</span><span class="n">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">user_data</span><span class="p">;</span><span class="w"> </span><span class="c1">// Приводим user_data к типу нашей структуры</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">alarm_active</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Если тревога активна, переключаем состояние светодиода и текста</span>
+<span class="w">        </span><span class="n">app</span><span class="o">-&gt;</span><span class="n">led_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">led_on</span><span class="p">;</span><span class="w"> </span><span class="c1">// Инвертируем состояние светодиода</span>
+<span class="w">        </span><span class="n">gpiod_line_set_value</span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">led_line</span><span class="p">,</span><span class="w"> </span><span class="n">app</span><span class="o">-&gt;</span><span class="n">led_on</span><span class="p">);</span><span class="w"> </span><span class="c1">// Устанавливаем значение на GPIO</span>
+
+<span class="w">        </span><span class="c1">// Обновляем текст лейбла: &quot;ТРЕВОГА&quot; или пустая строка для мигания</span>
+<span class="w">        </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">label_alarm</span><span class="p">),</span>
+<span class="w">                           </span><span class="n">app</span><span class="o">-&gt;</span><span class="n">led_on</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">&quot;⚠ ТРЕВОГА ⚠&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">TRUE</span><span class="p">;</span><span class="w"> </span><span class="c1">// Возвращаем TRUE, чтобы таймер продолжал работать</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Если тревога неактивна, выключаем светодиод и очищаем текст</span>
+<span class="w">        </span><span class="n">gpiod_line_set_value</span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">led_line</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Выключаем светодиод</span>
+<span class="w">        </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">label_alarm</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Очищаем текст лейбла</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"> </span><span class="c1">// Возвращаем FALSE, чтобы остановить таймер мигания</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Функция, вызываемая по таймеру для опроса состояния физической кнопки</span>
+<span class="n">gboolean</span><span class="w"> </span><span class="nf">poll_button</span><span class="p">(</span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">app_widgets</span><span class="w"> </span><span class="o">*</span><span class="n">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">user_data</span><span class="p">;</span><span class="w"> </span><span class="c1">// Приводим user_data к типу нашей структуры</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gpiod_line_get_value</span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">button_line</span><span class="p">);</span><span class="w"> </span><span class="c1">// Считываем значение с линии кнопки</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">val</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// Если кнопка нажата (предполагаем активный низкий уровень при нажатии)</span>
+<span class="w">        </span><span class="c1">// Если тревога еще не активна, активируем ее</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">alarm_active</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">app</span><span class="o">-&gt;</span><span class="n">alarm_active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"> </span><span class="c1">// Устанавливаем флаг тревоги в true</span>
+<span class="w">            </span><span class="c1">// Если таймер мигания не запущен, запускаем его</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">blink_timer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">app</span><span class="o">-&gt;</span><span class="n">blink_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g_timeout_add</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="n">blink_led</span><span class="p">,</span><span class="w"> </span><span class="n">app</span><span class="p">);</span><span class="w"> </span><span class="c1">// Запускаем таймер с интервалом 500 мс</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="c1">// Обновляем текст на кнопке GUI</span>
+<span class="w">            </span><span class="n">gtk_button_set_label</span><span class="p">(</span><span class="n">GTK_BUTTON</span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">button_toggle_alarm</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Отключить тревогу&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">TRUE</span><span class="p">;</span><span class="w"> </span><span class="c1">// Возвращаем TRUE, чтобы таймер опроса продолжал работать</span>
+<span class="p">}</span>
+
+<span class="c1">// Функция, вызываемая при нажатии кнопки &quot;Включить/Отключить тревогу&quot; в GUI</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">on_toggle_alarm</span><span class="p">(</span><span class="n">GtkButton</span><span class="w"> </span><span class="o">*</span><span class="n">button</span><span class="p">,</span><span class="w"> </span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">app_widgets</span><span class="w"> </span><span class="o">*</span><span class="n">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">user_data</span><span class="p">;</span><span class="w"> </span><span class="c1">// Приводим user_data к типу нашей структуры</span>
+<span class="w">    </span><span class="n">app</span><span class="o">-&gt;</span><span class="n">alarm_active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">alarm_active</span><span class="p">;</span><span class="w"> </span><span class="c1">// Инвертируем состояние тревоги</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">alarm_active</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Если тревога активирована через GUI</span>
+<span class="w">        </span><span class="n">gtk_button_set_label</span><span class="p">(</span><span class="n">button</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Отключить тревогу&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Меняем текст кнопки</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">blink_timer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Если таймер мигания не запущен, запускаем его</span>
+<span class="w">            </span><span class="n">app</span><span class="o">-&gt;</span><span class="n">blink_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g_timeout_add</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="n">blink_led</span><span class="p">,</span><span class="w"> </span><span class="n">app</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Если тревога деактивирована через GUI</span>
+<span class="w">        </span><span class="n">gtk_button_set_label</span><span class="p">(</span><span class="n">button</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Включить тревогу&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Меняем текст кнопки</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">blink_timer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Если таймер мигания запущен, останавливаем его</span>
+<span class="w">            </span><span class="n">g_source_remove</span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">blink_timer</span><span class="p">);</span>
+<span class="w">            </span><span class="n">app</span><span class="o">-&gt;</span><span class="n">blink_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// Сбрасываем идентификатор таймера</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">gpiod_line_set_value</span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">led_line</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Выключаем светодиод</span>
+<span class="w">        </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">app</span><span class="o">-&gt;</span><span class="n">label_alarm</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Очищаем текст лейбла</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Главная функция приложения</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">gtk_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">argv</span><span class="p">);</span><span class="w"> </span><span class="c1">// Инициализация библиотеки GTK</span>
+
+<span class="w">    </span><span class="c1">// Инициализация GPIO</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">gpiod_chip</span><span class="w"> </span><span class="o">*</span><span class="n">chip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gpiod_chip_open_by_name</span><span class="p">(</span><span class="n">CHIPNAME</span><span class="p">);</span><span class="w"> </span><span class="c1">// Открываем GPIO-чип</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">chip</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">perror</span><span class="p">(</span><span class="s">&quot;Ошибка открытия GPIO-чипа&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Получаем линии GPIO для светодиода и кнопки</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">gpiod_line</span><span class="w"> </span><span class="o">*</span><span class="n">led_line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gpiod_chip_get_line</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span><span class="w"> </span><span class="n">LED_GPIO</span><span class="p">);</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">gpiod_line</span><span class="w"> </span><span class="o">*</span><span class="n">button_line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gpiod_chip_get_line</span><span class="p">(</span><span class="n">chip</span><span class="p">,</span><span class="w"> </span><span class="n">BUTTON_GPIO</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">led_line</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">button_line</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">perror</span><span class="p">(</span><span class="s">&quot;Ошибка получения линий GPIO&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">gpiod_chip_close</span><span class="p">(</span><span class="n">chip</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Запрашиваем линии GPIO: светодиод как выход, кнопка как вход</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">gpiod_line_request_output</span><span class="p">(</span><span class="n">led_line</span><span class="p">,</span><span class="w"> </span><span class="n">CONSUMER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="c1">// LED как выход, начальное значение 0</span>
+<span class="w">        </span><span class="n">gpiod_line_request_input</span><span class="p">(</span><span class="n">button_line</span><span class="p">,</span><span class="w"> </span><span class="n">CONSUMER</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// BUTTON как вход</span>
+<span class="w">        </span><span class="n">perror</span><span class="p">(</span><span class="s">&quot;Ошибка запроса линий GPIO&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">gpiod_chip_close</span><span class="p">(</span><span class="n">chip</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Инициализация структуры app_widgets</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">app_widgets</span><span class="w"> </span><span class="n">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="p">.</span><span class="n">led_line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">led_line</span><span class="p">,</span><span class="w">       </span><span class="c1">// Присваиваем указатель на линию светодиода</span>
+<span class="w">        </span><span class="p">.</span><span class="n">button_line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">button_line</span><span class="p">,</span><span class="w"> </span><span class="c1">// Присваиваем указатель на линию кнопки</span>
+<span class="w">        </span><span class="p">.</span><span class="n">alarm_active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w">      </span><span class="c1">// Тревога изначально неактивна</span>
+<span class="w">        </span><span class="p">.</span><span class="n">led_on</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w">            </span><span class="c1">// Светодиод изначально выключен</span>
+<span class="w">        </span><span class="p">.</span><span class="n">blink_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w">            </span><span class="c1">// Таймер мигания неактивен</span>
+<span class="w">    </span><span class="p">};</span>
+
+<span class="w">    </span><span class="c1">// Создание и настройка GTK UI</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_window_new</span><span class="p">(</span><span class="n">GTK_WINDOW_TOPLEVEL</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем главное окно</span>
+<span class="w">    </span><span class="n">gtk_window_set_title</span><span class="p">(</span><span class="n">GTK_WINDOW</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Тревожный сигнал&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Устанавливаем заголовок окна</span>
+<span class="w">    </span><span class="n">gtk_window_set_default_size</span><span class="p">(</span><span class="n">GTK_WINDOW</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="mi">250</span><span class="p">,</span><span class="w"> </span><span class="mi">150</span><span class="p">);</span><span class="w"> </span><span class="c1">// Устанавливаем размер окна</span>
+<span class="w">    </span><span class="c1">// Подключаем сигнал закрытия окна к функции выхода из GTK</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">window</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;destroy&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">gtk_main_quit</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Создаем вертикальный контейнер для размещения виджетов</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">vbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_box_new</span><span class="p">(</span><span class="n">GTK_ORIENTATION_VERTICAL</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// Отступ 10 пикселей</span>
+<span class="w">    </span><span class="n">gtk_container_add</span><span class="p">(</span><span class="n">GTK_CONTAINER</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="n">vbox</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем контейнер в окно</span>
+
+<span class="w">    </span><span class="c1">// Создаем лейбл для отображения текста тревоги</span>
+<span class="w">    </span><span class="n">app</span><span class="p">.</span><span class="n">label_alarm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Добавляем лейбл в контейнер, расширяя его по вертикали и горизонтали</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">label_alarm</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Создаем кнопку для управления тревогой</span>
+<span class="w">    </span><span class="n">app</span><span class="p">.</span><span class="n">button_toggle_alarm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_button_new_with_label</span><span class="p">(</span><span class="s">&quot;Включить тревогу&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Добавляем кнопку в контейнер</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">button_toggle_alarm</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Подключаем сигнал нажатия кнопки к нашей функции on_toggle_alarm</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">app</span><span class="p">.</span><span class="n">button_toggle_alarm</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;clicked&quot;</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">on_toggle_alarm</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">app</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">gtk_widget_show_all</span><span class="p">(</span><span class="n">window</span><span class="p">);</span><span class="w"> </span><span class="c1">// Показываем все виджеты в окне</span>
+
+<span class="w">    </span><span class="c1">// Запускаем таймер для периодического опроса физической кнопки</span>
+<span class="w">    </span><span class="n">app</span><span class="p">.</span><span class="n">poll_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g_timeout_add</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">poll_button</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">app</span><span class="p">);</span><span class="w"> </span><span class="c1">// Опрос каждые 100 мс</span>
+
+<span class="w">    </span><span class="n">gtk_main</span><span class="p">();</span><span class="w"> </span><span class="c1">// Запускаем основной цикл обработки событий GTK</span>
+
+<span class="w">    </span><span class="c1">// --- Очистка ресурсов перед завершением программы ---</span>
+<span class="w">    </span><span class="n">gpiod_line_set_value</span><span class="p">(</span><span class="n">led_line</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Убедимся, что светодиод выключен</span>
+<span class="w">    </span><span class="n">gpiod_line_release</span><span class="p">(</span><span class="n">led_line</span><span class="p">);</span><span class="w">      </span><span class="c1">// Освобождаем линию светодиода</span>
+<span class="w">    </span><span class="n">gpiod_line_release</span><span class="p">(</span><span class="n">button_line</span><span class="p">);</span><span class="w">   </span><span class="c1">// Освобождаем линию кнопки</span>
+<span class="w">    </span><span class="n">gpiod_chip_close</span><span class="p">(</span><span class="n">chip</span><span class="p">);</span><span class="w">            </span><span class="c1">// Закрываем GPIO-чип</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// Успешное завершение программы</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Компиляция и запуск
+Для компиляции и запуска этого приложения на вашем Raspberry Pi Zero 2 W выполните следующие шаги:</p>
+<p>Сохраните код:
+Сохраните приведенный выше C-код в файл, например, led_alarm_gui.c.</p>
+<p>Компиляция:
+Используйте gcc для компиляции. Убедитесь, что у вас установлены библиотеки libgtk-3-dev и libgpiod-dev (как в Главе 1).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gcc<span class="w"> </span>led_alarm_gui.c<span class="w"> </span>-o<span class="w"> </span>led_alarm_gui<span class="w"> </span><span class="k">$(</span>pkg-config<span class="w"> </span>--cflags<span class="w"> </span>--libs<span class="w"> </span>gtk+-3.0<span class="w"> </span>libgpiod<span class="k">)</span><span class="w"> </span>-Wall<span class="w"> </span>-Wextra
+</pre></div>
+</div>
+<p><strong>gcc</strong>: Компилятор C.</p>
+<p><strong>led_alarm_gui.c</strong> : Исходный файл с вашим кодом.</p>
+<p><strong>-o led_alarm_gui</strong> : Имя выходного исполняемого файла.</p>
+<p><strong>$(pkg-config –cflags –libs gtk+-3.0 libgpiod)</strong> : Автоматически включает необходимые флаги компилятора и библиотеки для GTK3 и libgpiod.</p>
+<p><strong>-Wall -Wextra</strong> : Включает все стандартные и дополнительные предупреждения компилятора, что помогает выявлять потенциальные ошибки.</p>
+<p>Запуск:
+После успешной компиляции запустите программу:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./led_alarm_gui
+</pre></div>
+</div>
+<p>Теперь вы должны увидеть окно GTK с кнопкой и мигающей надписью «ТРЕВОГА» при активации тревоги (либо нажатием физической кнопки, либо кнопкой в GUI).</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Нижняя область">
+        <a href="../chapter01/index.html" class="btn btn-neutral float-left" title="Глава 1: Начало работы" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Предыдущая</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alex Malachevsky.</p>
+  </div>
+
+  Собрано при помощи <a href="https://www.sphinx-doc.org/">Sphinx</a> с использованием
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы,</a>
+    предоставленной <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
