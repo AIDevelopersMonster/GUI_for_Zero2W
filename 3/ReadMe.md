@@ -50,10 +50,10 @@
 
 1.  **Клонируйте репозиторий** (или скачайте файл `binary_game.c`):
     ```bash
-    git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
-    cd your-repo-name/chapter3
+    git clone [https://github.com/AIDevelopersMonster/GUI_for_Zero2W.git](https://github.com/AIDevelopersMonster/GUI_for_Zero2W.git))
+    cd GUI_for_Zero2W/chapter3
     ```
-    (Замените `your-username/your-repo-name` и `chapter3` на актуальные данные вашего проекта.)
+
 
 2.  **Установите необходимые библиотеки**, если они еще не установлены:
     ```bash
