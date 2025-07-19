@@ -67,9 +67,30 @@ void on_scale_changed(GtkRange *range, gpointer user_data) {
 // --- Основная функция программы ---
 
 int main(int argc, char *argv[]) {
-    // Инициализация библиотеки pigpio. Это должно быть сделано перед любым использованием pigpio функций.
+    // Инициализация GTK. Должна быть вызвана первой.
+    gtk_init(&argc, &argv);
+
+    // --- Инициализация библиотеки pigpio ---
+    // Это должно быть сделано перед любым использованием pigpio функций.
+    // Если gpioInitialise() возвращает < 0, это означает ошибку (демон не запущен или недоступен).
     if (gpioInitialise() < 0) {
-        g_printerr("Failed to initialize pigpio\n"); // Выводим сообщение об ошибке, если инициализация не удалась
+        g_printerr("Ошибка: Демон pigpiod не запущен или недоступен.\n");
+        g_printerr("Пожалуйста, убедитесь, что pigpiod запущен (например, командой 'sudo pigpiod' или 'sudo systemctl start pigpiod').\n");
+
+        // Создаем простое сообщение об ошибке для пользователя
+        GtkWidget *dialog;
+        dialog = gtk_message_dialog_new(NULL,
+                                        GTK_DIALOG_MODAL,
+                                        GTK_MESSAGE_ERROR,
+                                        GTK_BUTTONS_CLOSE,
+                                        "Ошибка инициализации pigpio");
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+                                                 "Не удалось подключиться к демону pigpiod.\n"
+                                                 "Убедитесь, что демон запущен и работает.\n"
+                                                 "Попробуйте запустить 'sudo pigpiod' в терминале.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
+
         return 1; // Завершаем программу с ошибкой
     }
 
@@ -79,12 +100,10 @@ int main(int argc, char *argv[]) {
     gpioSetPWMrange(GREEN_PIN, 255);
     gpioSetPWMrange(BLUE_PIN, 255);
 
-    gtk_init(&argc, &argv); // Инициализация GTK. Должна быть вызвана первой.
-
     // --- Создание главного окна GTK ---
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "RGB LED Control (pigpio)"); // Заголовок окна
-    gtk_window_set_default_size(GTK_WINDOW(window), 400, 300); // Размер окна по умолчанию
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 450); // Увеличиваем высоту окна, чтобы вместить ползунки
     // Подключаем сигнал "destroy" (закрытие окна) к функции gtk_main_quit для завершения приложения.
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -95,21 +114,28 @@ int main(int argc, char *argv[]) {
 
     // --- Виджет для отображения цвета ---
     color_area = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0); // Создаем контейнер, который будет служить областью цвета
-    gtk_widget_set_size_request(color_area, 200, 100); // Устанавливаем фиксированный размер
+    gtk_widget_set_size_request(color_area, 250, 150); // Увеличиваем размер области цвета
     gtk_widget_set_name(color_area, "color_display"); // Присваиваем CSS-идентификатор для стилизации
     gtk_box_pack_start(GTK_BOX(vbox), color_area, FALSE, FALSE, 0); // Добавляем в vbox
     gtk_widget_set_halign(color_area, GTK_ALIGN_CENTER); // Центрируем по горизонтали
 
     // --- Сетка для ползунков и меток ---
     GtkWidget *grid = gtk_grid_new(); // Создаем виджет сетки
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 10); // Отступы между строками
-    gtk_grid_set_column_spacing(GTK_GRID(grid), 10); // Отступы между столбцами
-    gtk_box_pack_start(GTK_BOX(vbox), grid, TRUE, TRUE, 10); // Добавляем сетку в vbox
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 15); // Увеличиваем отступы между строками
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 15); // Увеличиваем отступы между столбцами
+    gtk_box_pack_start(GTK_BOX(vbox), grid, TRUE, TRUE, 20); // Добавляем сетку в vbox, увеличиваем отступ
 
     // --- Создание ползунков (GtkScale) и присвоение их глобальным переменным ---
     scale_r_global = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 255, 1);
     scale_g_global = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 255, 1);
     scale_b_global = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 255, 1);
+
+    // Установка минимального размера для ползунков.
+    // Ширина 250px для горизонтальных ползунков. Высота обычно регулируется автоматически.
+    gtk_widget_set_size_request(scale_r_global, 250, -1);
+    gtk_widget_set_size_request(scale_g_global, 250, -1);
+    gtk_widget_set_size_request(scale_b_global, 250, -1);
+
 
     // --- Создание меток для отображения значений R, G, B ---
     label_r = gtk_label_new("R: 0");
