@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RGB LED Controller (GTK + pigpio) &mdash; документация GUI_for_Zero2W 0.1</title>
+      <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../static/css/theme.css" type="text/css" />
+  
+        <script data-url_root="../" id="documentation_options" src="../static/documentation_options.js"></script>
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/sphinx_highlight.js"></script>
+        <script src="../static/translations.js"></script>
+    <script src="../static/js/theme.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
+    <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="prev" title="Глава 3: Игра „Двоичное Число“ и GPIO-индикация" href="../chapter03/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GUI_for_Zero2W
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Меню навигации">
+              <p class="caption" role="heading"><span class="caption-text">Содержание:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../chapter01/index.html">Глава 1: Начало работы</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter02/index.html">Глава 2: Реакция на кнопку и тревожный индикатор</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter03/index.html">Глава 3: Игра „Двоичное Число“ и GPIO-индикация</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">RGB LED Controller (GTK + pigpio)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Меню навигации для мобильных устройств" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GUI_for_Zero2W</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Навигация по страницам">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">RGB LED Controller (GTK + pigpio)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../sources/chapter04/index.rst.txt" rel="nofollow"> Просмотреть исходный код страницы</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rgb-led-controller-gtk-pigpio">
+<h1>RGB LED Controller (GTK + pigpio)<a class="headerlink" href="#rgb-led-controller-gtk-pigpio" title="Permalink to this heading"></a></h1>
+<p>Приложение для управления RGB-светодиодом с помощью графического интерфейса на <cite>GTK+3</cite>
+и аппаратного ШИМ через <cite>pigpio</cite>. Работает на Raspberry Pi.</p>
+<p>—</p>
+<p>## Описание</p>
+<p>Программа предоставляет простой GUI с тремя ползунками (R, G, B), которые управляют
+яркостью каналов RGB-светодиода. При изменении значений:</p>
+<ul class="simple">
+<li><p>отправляется ШИМ-сигнал на соответствующий GPIO-пин;</p></li>
+<li><p>обновляется отображаемый цвет в окне;</p></li>
+<li><p>значения яркости отображаются в виде чисел.</p></li>
+</ul>
+<p>Поддерживаются светодиоды с общим катодом (подключение напрямую к GPIO через резисторы).</p>
+<p>Используемые пины (Broadcom GPIO):</p>
+<ul class="simple">
+<li><p><strong>GPIO17</strong> — красный (R)</p></li>
+<li><p><strong>GPIO27</strong> — зелёный (G)</p></li>
+<li><p><strong>GPIO18</strong> — синий (B)</p></li>
+</ul>
+<p>—</p>
+<p>## Требования</p>
+<p>Для успешной сборки и запуска проекта вам понадобятся:</p>
+<ul class="simple">
+<li><p><strong>Raspberry Pi:</strong> Любая модель с 40-пиновым разъемом GPIO (например, Raspberry Pi 2, 3, 4, 5).</p></li>
+<li><p><strong>Операционная система:</strong> Raspberry Pi OS (ранее Raspbian) или другая совместимая Linux-система.</p></li>
+<li><dl class="simple">
+<dt><strong>Библиотеки:</strong></dt><dd><ul>
+<li><p><strong>GTK 3:</strong> Библиотека для создания графического интерфейса.</p></li>
+<li><p><strong>pigpio:</strong> Библиотека для высокоточного управления GPIO, включая ШИМ (PWM).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Аппаратные компоненты:</strong></dt><dd><ul>
+<li><p><strong>RGB-светодиод:</strong> С общим катодом (наиболее распространенный) или общим анодом.</p></li>
+<li><p><strong>Резисторы:</strong> Три токоограничивающих резистора (например, 220 Ом или 330 Ом, в зависимости от светодиода и напряжения питания) для каждого из трех цветовых каналов RGB-светодиода.</p></li>
+<li><p><strong>Макетная плата и соединительные провода:</strong> Для сборки схемы.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>—</p>
+<p>## Подключение компонентов (Схема)</p>
+<p>Для <strong>RGB-светодиода с общим катодом</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Длинная ножка (общий катод):</strong> Подключите к контакту <strong>GND</strong> (земля) Raspberry Pi.</p></li>
+<li><p><strong>Красный канал:</strong> Подключите ножку красного цвета к <strong>GPIO 17</strong> (физический пин 11) через токоограничивающий резистор.</p></li>
+<li><p><strong>Зеленый канал:</strong> Подключите ножку зеленого цвета к <strong>GPIO 27</strong> (физический пин 13) через токоограничивающий резистор.</p></li>
+<li><p><strong>Синий канал:</strong> Подключите ножку синего цвета к <strong>GPIO 18</strong> (физический пин 12) через токоограничивающий резистор.</p></li>
+</ol>
+<p>Для <strong>RGB-светодиода с общим анодом</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Длинная ножка (общий анод):</strong> Подключите к контакту <strong>3.3V</strong> Raspberry Pi.</p></li>
+<li><p><strong>Красный канал:</strong> Подключите ножку красного цвета к <strong>GPIO 17</strong> (физический пин 11) через токоограничивающий резистор.</p></li>
+<li><p><strong>Зеленый канал:</strong> Подключите ножку зеленого цвета к <strong>GPIO 27</strong> (физический пин 13) через токоограничивающий резистор.</p></li>
+<li><p><strong>Синий канал:</strong> Подключите ножку синего цвета к <strong>GPIO 18</strong> (физический пин 12) через токоограничивающий резистор.
+* <strong>Примечание:</strong> Для светодиодов с общим анодом логика ШИМ инвертируется (0% рабочего цикла = максимальная яркость, 100% = выключено). Код написан для общего катода, где более высокое значение соответствует большей яркости. Если цвета будут инвертированы, возможно, потребуется изменить значения <cite>value</cite> на <cite>255 - value</cite> перед вызовом <cite>gpioPWM</cite>.</p></li>
+</ol>
+<p>—</p>
+<p>## Установка зависимостей</p>
+<p>Убедитесь, что у вас установлены необходимые библиотеки.</p>
+<p><strong>1. Установка GTK 3:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>update
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>libgtk-3-dev
+</pre></div>
+</div>
+<p><strong>2. Установка pigpio:</strong></p>
+<p>Библиотека pigpio часто предустановлена на Raspberry Pi OS. Если нет, вы можете установить её:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>pigpio
+</pre></div>
+</div>
+<p>—</p>
+<p>## Запуск pigpio-демона</p>
+<p>Для работы <cite>pigpio</cite> требуется фоновый демон <cite>pigpiod</cite>. Его нужно запустить <strong>до запуска программы</strong>, либо ваша программа может запустить его автоматически.</p>
+<p><strong>Рекомендуемый способ запуска (через systemd) для постоянной работы:</strong></p>
+<p>Если вы хотите, чтобы <cite>pigpiod</cite> работал всегда в фоновом режиме (независимо от вашей программы) и был доступен для других приложений, используйте <cite>systemctl</cite>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>pigpiod<span class="w"> </span><span class="c1"># Включает автозапуск при загрузке (однократно)</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>pigpiod<span class="w">  </span><span class="c1"># Запускает демон прямо сейчас</span>
+</pre></div>
+</div>
+<p><strong>Проверка статуса демона:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>pigpiod
+</pre></div>
+</div>
+<p>Вы должны увидеть <cite>Active: active (running)</cite>.</p>
+<p><strong>Остановить вручную (при необходимости):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>pigpiod
+</pre></div>
+</div>
+<p>—</p>
+<p>## Исходный код</p>
+<p>Сохраните следующий код в файл с именем <cite>rgb_pwm_gui.c</cite>:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;gtk/gtk.h&gt;</span><span class="c1"> // Подключаем библиотеку GTK для создания графического интерфейса</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pigpio.h&gt;</span><span class="c1"> // Подключаем библиотеку pigpio для работы с GPIO и ШИМ</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span><span class="c1">   // Подключаем стандартную библиотеку ввода/вывода для snprintf</span>
+
+<span class="c1">// Определяем константы для номеров GPIO-пинов, связанных с каждым цветом.</span>
+<span class="c1">// Эти пины будут использоваться для ШИМ.</span>
+<span class="cp">#define RED_PIN    17</span>
+<span class="cp">#define GREEN_PIN  27</span>
+<span class="cp">#define BLUE_PIN   18</span>
+
+<span class="c1">// Глобальные указатели на виджеты GTK.</span>
+<span class="c1">// color_area: Виджет, который будет отображать текущий смешанный цвет.</span>
+<span class="c1">// label_r, label_g, label_b: Метки для отображения числовых значений (0-255) каждого цвета.</span>
+<span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">color_area</span><span class="p">;</span>
+<span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">label_r</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">label_g</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">label_b</span><span class="p">;</span>
+
+<span class="c1">// Глобальные указатели на виджеты ползунков для более легкого доступа в on_scale_changed</span>
+<span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">scale_r_global</span><span class="p">;</span>
+<span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">scale_g_global</span><span class="p">;</span>
+<span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">scale_b_global</span><span class="p">;</span>
+
+<span class="c1">// --- Функции ---</span>
+
+<span class="c1">// Функция для обновления цвета виджета в GUI</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">update_color_display</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">css</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+<span class="w">    </span><span class="c1">// Формируем строку CSS, которая задает фоновый цвет виджета</span>
+<span class="w">    </span><span class="n">snprintf</span><span class="p">(</span><span class="n">css</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">css</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;#color_display { background-color: rgb(%d,%d,%d); }&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">GtkCssProvider</span><span class="w"> </span><span class="o">*</span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_css_provider_new</span><span class="p">();</span>
+<span class="w">    </span><span class="n">gtk_css_provider_load_from_data</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span><span class="w"> </span><span class="n">css</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">GtkStyleContext</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_widget_get_style_context</span><span class="p">(</span><span class="n">color_area</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_style_context_add_provider</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">GTK_STYLE_PROVIDER</span><span class="p">(</span><span class="n">provider</span><span class="p">),</span><span class="w"> </span><span class="n">GTK_STYLE_PROVIDER_PRIORITY_USER</span><span class="p">);</span>
+<span class="w">    </span><span class="n">g_object_unref</span><span class="p">(</span><span class="n">provider</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Функция обратного вызова, вызываемая при изменении значения любого ползунка.</span>
+<span class="c1">// user_data теперь не используется для получения значений ползунков,</span>
+<span class="c1">// так как они глобальны.</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">on_scale_changed</span><span class="p">(</span><span class="n">GtkRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Получаем текущие значения со всех трех ползунков напрямую, так как они глобальны</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">gtk_range_get_value</span><span class="p">(</span><span class="n">GTK_RANGE</span><span class="p">(</span><span class="n">scale_r_global</span><span class="p">));</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">gtk_range_get_value</span><span class="p">(</span><span class="n">GTK_RANGE</span><span class="p">(</span><span class="n">scale_g_global</span><span class="p">));</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">gtk_range_get_value</span><span class="p">(</span><span class="n">GTK_RANGE</span><span class="p">(</span><span class="n">scale_b_global</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// Обновляем текстовые метки рядом с ползунками</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">text</span><span class="p">[</span><span class="mi">16</span><span class="p">];</span>
+<span class="w">    </span><span class="n">snprintf</span><span class="p">(</span><span class="n">text</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">text</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;R: %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">label_r</span><span class="p">),</span><span class="w"> </span><span class="n">text</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">snprintf</span><span class="p">(</span><span class="n">text</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">text</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;G: %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">label_g</span><span class="p">),</span><span class="w"> </span><span class="n">text</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">snprintf</span><span class="p">(</span><span class="n">text</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">text</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;B: %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">label_b</span><span class="p">),</span><span class="w"> </span><span class="n">text</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Отправляем ШИМ-сигналы на GPIO-пины с помощью pigpio</span>
+<span class="w">    </span><span class="n">gpioPWM</span><span class="p">(</span><span class="n">RED_PIN</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gpioPWM</span><span class="p">(</span><span class="n">GREEN_PIN</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gpioPWM</span><span class="p">(</span><span class="n">BLUE_PIN</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Обновляем цвет отображаемого виджета в GUI</span>
+<span class="w">    </span><span class="n">update_color_display</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// --- Основная функция программы ---</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Инициализация GTK. Должна быть вызвана первой.</span>
+<span class="w">    </span><span class="n">gtk_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">argv</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// --- Инициализация библиотеки pigpio ---</span>
+<span class="w">    </span><span class="c1">// Это должно быть сделано перед любым использованием pigpio функций.</span>
+<span class="w">    </span><span class="c1">// Если gpioInitialise() возвращает &lt; 0, это означает ошибку (демон не запущен или недоступен).</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">gpioInitialise</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">g_printerr</span><span class="p">(</span><span class="s">&quot;Ошибка: Демон pigpiod не запущен или недоступен.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">g_printerr</span><span class="p">(</span><span class="s">&quot;Пожалуйста, убедитесь, что pigpiod запущен (например, командой &#39;sudo pigpiod&#39; или &#39;sudo systemctl start pigpiod&#39;).</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Создаем простое сообщение об ошибке для пользователя</span>
+<span class="w">        </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">dialog</span><span class="p">;</span>
+<span class="w">        </span><span class="n">dialog</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_message_dialog_new</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">GTK_DIALOG_MODAL</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">GTK_MESSAGE_ERROR</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">GTK_BUTTONS_CLOSE</span><span class="p">,</span>
+<span class="w">                                        </span><span class="s">&quot;Ошибка инициализации pigpio&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">gtk_message_dialog_format_secondary_text</span><span class="p">(</span><span class="n">GTK_MESSAGE_DIALOG</span><span class="p">(</span><span class="n">dialog</span><span class="p">),</span>
+<span class="w">                                                 </span><span class="s">&quot;Не удалось подключиться к демону pigpiod.</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">                                                 </span><span class="s">&quot;Убедитесь, что демон запущен и работает.</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">                                                 </span><span class="s">&quot;Попробуйте запустить &#39;sudo pigpiod&#39; в терминале.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">gtk_dialog_run</span><span class="p">(</span><span class="n">GTK_DIALOG</span><span class="p">(</span><span class="n">dialog</span><span class="p">));</span>
+<span class="w">        </span><span class="n">gtk_widget_destroy</span><span class="p">(</span><span class="n">dialog</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="c1">// Завершаем программу с ошибкой</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Устанавливаем диапазон ШИМ для каждого пина в 255.</span>
+<span class="w">    </span><span class="c1">// Это означает, что значения от 0 до 255 будут соответствовать 0% до 100% рабочего цикла.</span>
+<span class="w">    </span><span class="n">gpioSetPWMrange</span><span class="p">(</span><span class="n">RED_PIN</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gpioSetPWMrange</span><span class="p">(</span><span class="n">GREEN_PIN</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gpioSetPWMrange</span><span class="p">(</span><span class="n">BLUE_PIN</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// --- Создание главного окна GTK ---</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_window_new</span><span class="p">(</span><span class="n">GTK_WINDOW_TOPLEVEL</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_window_set_title</span><span class="p">(</span><span class="n">GTK_WINDOW</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;RGB LED Control (pigpio)&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Заголовок окна</span>
+<span class="w">    </span><span class="n">gtk_window_set_default_size</span><span class="p">(</span><span class="n">GTK_WINDOW</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="mi">400</span><span class="p">,</span><span class="w"> </span><span class="mi">450</span><span class="p">);</span><span class="w"> </span><span class="c1">// Увеличиваем высоту окна, чтобы вместить ползунки</span>
+<span class="w">    </span><span class="c1">// Подключаем сигнал &quot;destroy&quot; (закрытие окна) к функции gtk_main_quit для завершения приложения.</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">window</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;destroy&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">gtk_main_quit</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// --- Создание основного вертикального контейнера ---</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">vbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_box_new</span><span class="p">(</span><span class="n">GTK_ORIENTATION_VERTICAL</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// Вертикальный контейнер с отступом 10px</span>
+<span class="w">    </span><span class="n">gtk_container_set_border_width</span><span class="p">(</span><span class="n">GTK_CONTAINER</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span><span class="w"> </span><span class="c1">// Устанавливаем отступ от края окна для vbox</span>
+<span class="w">    </span><span class="n">gtk_container_add</span><span class="p">(</span><span class="n">GTK_CONTAINER</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="n">vbox</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем vbox в главное окно</span>
+
+<span class="w">    </span><span class="c1">// --- Виджет для отображения цвета ---</span>
+<span class="w">    </span><span class="n">color_area</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_box_new</span><span class="p">(</span><span class="n">GTK_ORIENTATION_VERTICAL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем контейнер, который будет служить областью цвета</span>
+<span class="w">    </span><span class="n">gtk_widget_set_size_request</span><span class="p">(</span><span class="n">color_area</span><span class="p">,</span><span class="w"> </span><span class="mi">250</span><span class="p">,</span><span class="w"> </span><span class="mi">150</span><span class="p">);</span><span class="w"> </span><span class="c1">// Увеличиваем размер области цвета</span>
+<span class="w">    </span><span class="n">gtk_widget_set_name</span><span class="p">(</span><span class="n">color_area</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;color_display&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Присваиваем CSS-идентификатор для стилизации</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">color_area</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем в vbox</span>
+<span class="w">    </span><span class="n">gtk_widget_set_halign</span><span class="p">(</span><span class="n">color_area</span><span class="p">,</span><span class="w"> </span><span class="n">GTK_ALIGN_CENTER</span><span class="p">);</span><span class="w"> </span><span class="c1">// Центрируем по горизонтали</span>
+
+<span class="w">    </span><span class="c1">// --- Сетка для ползунков и меток ---</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_grid_new</span><span class="p">();</span><span class="w"> </span><span class="c1">// Создаем виджет сетки</span>
+<span class="w">    </span><span class="n">gtk_grid_set_row_spacing</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="mi">15</span><span class="p">);</span><span class="w"> </span><span class="c1">// Увеличиваем отступы между строками</span>
+<span class="w">    </span><span class="n">gtk_grid_set_column_spacing</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="mi">15</span><span class="p">);</span><span class="w"> </span><span class="c1">// Увеличиваем отступы между столбцами</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">grid</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем сетку в vbox, увеличиваем отступ</span>
+
+<span class="w">    </span><span class="c1">// --- Создание ползунков (GtkScale) и присвоение их глобальным переменным ---</span>
+<span class="w">    </span><span class="n">scale_r_global</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_scale_new_with_range</span><span class="p">(</span><span class="n">GTK_ORIENTATION_HORIZONTAL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">scale_g_global</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_scale_new_with_range</span><span class="p">(</span><span class="n">GTK_ORIENTATION_HORIZONTAL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">scale_b_global</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_scale_new_with_range</span><span class="p">(</span><span class="n">GTK_ORIENTATION_HORIZONTAL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Установка минимального размера для ползунков.</span>
+<span class="w">    </span><span class="c1">// Ширина 250px для горизонтальных ползунков. Высота обычно регулируется автоматически.</span>
+<span class="w">    </span><span class="n">gtk_widget_set_size_request</span><span class="p">(</span><span class="n">scale_r_global</span><span class="p">,</span><span class="w"> </span><span class="mi">250</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_widget_set_size_request</span><span class="p">(</span><span class="n">scale_g_global</span><span class="p">,</span><span class="w"> </span><span class="mi">250</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_widget_set_size_request</span><span class="p">(</span><span class="n">scale_b_global</span><span class="p">,</span><span class="w"> </span><span class="mi">250</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">);</span>
+
+
+<span class="w">    </span><span class="c1">// --- Создание меток для отображения значений R, G, B ---</span>
+<span class="w">    </span><span class="n">label_r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;R: 0&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">label_g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;G: 0&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">label_b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;B: 0&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// --- Размещение виджетов в сетке ---</span>
+<span class="w">    </span><span class="n">gtk_grid_attach</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;Red&quot;</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_grid_attach</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="n">scale_r_global</span><span class="p">,</span><span class="w">      </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_grid_attach</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="n">label_r</span><span class="p">,</span><span class="w">             </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">gtk_grid_attach</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;Green&quot;</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_grid_attach</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="n">scale_g_global</span><span class="p">,</span><span class="w">      </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_grid_attach</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="n">label_g</span><span class="p">,</span><span class="w">             </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">gtk_grid_attach</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;Blue&quot;</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_grid_attach</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="n">scale_b_global</span><span class="p">,</span><span class="w">      </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_grid_attach</span><span class="p">(</span><span class="n">GTK_GRID</span><span class="p">(</span><span class="n">grid</span><span class="p">),</span><span class="w"> </span><span class="n">label_b</span><span class="p">,</span><span class="w">             </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// --- Подключение сигналов к ползункам ---</span>
+<span class="w">    </span><span class="c1">// Теперь user_data не нужен, можно передать NULL</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">scale_r_global</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value-changed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">on_scale_changed</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">scale_g_global</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value-changed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">on_scale_changed</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">scale_b_global</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value-changed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">on_scale_changed</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">gtk_widget_show_all</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_main</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// --- Очистка ресурсов pigpio после завершения работы GUI ---</span>
+<span class="w">    </span><span class="n">gpioTerminate</span><span class="p">();</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Нижняя область">
+        <a href="../chapter03/index.html" class="btn btn-neutral float-left" title="Глава 3: Игра „Двоичное Число“ и GPIO-индикация" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Предыдущая</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alex Malachevsky.</p>
+  </div>
+
+  Собрано при помощи <a href="https://www.sphinx-doc.org/">Sphinx</a> с использованием
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы,</a>
+    предоставленной <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
