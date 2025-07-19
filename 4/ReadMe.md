@@ -300,7 +300,7 @@ sudo ./rgb_pwm_gui
 
 ## Автор
 
-**Автор:** *Ваше имя*
+**Автор:** *Alex Malachevsky*
 **Проект:** RGB LED Control via GTK and pigpio
 
 ```
