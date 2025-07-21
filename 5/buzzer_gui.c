@@ -1,106 +1,200 @@
-#include <gtk/gtk.h>
-#include <gpiod.h>
-#include <unistd.h>
+#include <gtk/gtk.h>    // Включаем заголовочный файл для библиотеки GTK+ (для создания графического интерфейса пользователя)
+#include <gpiod.h>    // Включаем заголовочный файл для библиотеки libgpiod (для работы с GPIO на Linux-системах)
+#include <unistd.h>     // Включаем заголовочный файл для стандартных функций Unix, таких как usleep (задержки в микросекундах)
 
-#define CHIP_NAME "gpiochip0"
-#define BUZZER_LINE 17
+// --- Константы для настройки GPIO ---
+#define CHIP_NAME "gpiochip0" // Имя GPIO-чипа, который мы будем использовать. На Raspberry Pi это обычно "gpiochip0".
+#define BUZZER_LINE 17        // Номер линии GPIO (пина), к которой подключен активный зуммер. Здесь это GPIO17.
 
-static struct gpiod_chip *chip;
-static struct gpiod_line *line;
-static int selected_melody = 1;
+// --- Глобальные переменные для работы с gpiod ---
+// Эти переменные объявлены как static, чтобы они были доступны только в этом файле
+// и сохраняли свое состояние между вызовами функций.
+static struct gpiod_chip *chip; // Указатель на структуру, представляющую GPIO-чип.
+static struct gpiod_line *line; // Указатель на структуру, представляющую конкретную линию GPIO (пин).
 
+// --- Глобальная переменная для хранения выбранной мелодии ---
+static int selected_melody = 1; // Хранит номер мелодии, выбранной пользователем через радиокнопки. По умолчанию выбрана Мелодия 1.
+
+// --- Функции управления зуммером ---
+
+/**
+ * @brief Включает активный зуммер, устанавливая высокий уровень на GPIO-линии.
+ */
 void buzzer_on() {
+    // Устанавливаем значение 1 (высокий уровень) на указанной GPIO-линии.
+    // Это приводит к включению зуммера (при условии правильного подключения через транзистор).
     gpiod_line_set_value(line, 1);
 }
 
+/**
+ * @brief Выключает активный зуммер, устанавливая низкий уровень на GPIO-линии.
+ */
 void buzzer_off() {
+    // Устанавливаем значение 0 (низкий уровень) на указанной GPIO-линии.
+    // Это приводит к выключению зуммера.
     gpiod_line_set_value(line, 0);
 }
 
+/**
+ * @brief Воспроизводит одну из трех предопределенных мелодий на зуммере.
+ * @param melody Номер мелодии для воспроизведения (1, 2 или 3).
+ */
 void play_melody(int melody) {
+    // Используем оператор switch для выбора нужного паттерна мелодии.
     switch (melody) {
-        case 1:
-            buzzer_on(); usleep(200000);
-            buzzer_off(); usleep(100000);
-            buzzer_on(); usleep(300000);
-            buzzer_off();
-            break;
-        case 2:
-            for (int i = 0; i < 4; ++i) {
-                buzzer_on(); usleep(150000);
-                buzzer_off(); usleep(150000);
+        case 1: // Мелодия 1: Два писка разной длины
+            buzzer_on();    // Зуммер ВКЛ
+            usleep(200000); // Задержка 200 миллисекунд (200,000 микросекунд)
+            buzzer_off();   // Зуммер ВЫКЛ
+            usleep(100000); // Пауза 100 миллисекунд
+            buzzer_on();    // Зуммер ВКЛ
+            usleep(300000); // Задержка 300 миллисекунд
+            buzzer_off();   // Зуммер ВЫКЛ
+            break;          // Выход из switch
+        case 2: // Мелодия 2: Четыре коротких, равномерных писка
+            for (int i = 0; i < 4; ++i) { // Повторяем 4 раза
+                buzzer_on();    // Зуммер ВКЛ
+                usleep(150000); // Задержка 150 миллисекунд
+                buzzer_off();   // Зуммер ВЫКЛ
+                usleep(150000); // Пауза 150 миллисекунд
             }
-            break;
-        case 3:
-            buzzer_on(); usleep(500000);
-            buzzer_off(); usleep(100000);
-            buzzer_on(); usleep(500000);
-            buzzer_off();
-            break;
-        default:
+            break;          // Выход из switch
+        case 3: // Мелодия 3: Два длинных писка
+            buzzer_on();    // Зуммер ВКЛ
+            usleep(500000); // Задержка 500 миллисекунд
+            buzzer_off();   // Зуммер ВЫКЛ
+            usleep(100000); // Пауза 100 миллисекунд
+            buzzer_on();    // Зуммер ВКЛ
+            usleep(500000); // Задержка 500 миллисекунд
+            buzzer_off();   // Зуммер ВЫКЛ
+            break;          // Выход из switch
+        default: // Если передан неизвестный номер мелодии, ничего не делаем.
             break;
     }
 }
 
+// --- Функции обратного вызова для GUI (GTK+) ---
+
+/**
+ * @brief Функция обратного вызова, вызываемая при переключении состояния радиокнопки.
+ * @param button Указатель на GtkToggleButton, который вызвал событие.
+ * @param user_data Пользовательские данные, переданные при подключении сигнала (здесь - номер мелодии).
+ */
 void on_melody_selected(GtkToggleButton *button, gpointer user_data) {
+    // Проверяем, активна ли (выбрана) текущая радиокнопка.
     if (gtk_toggle_button_get_active(button)) {
+        // Если кнопка активна, обновляем глобальную переменную selected_melody
+        // значением, которое было передано как user_data (номер мелодии).
         selected_melody = GPOINTER_TO_INT(user_data);
     }
 }
 
+/**
+ * @brief Функция обратного вызова, вызываемая при нажатии кнопки "Проиграть".
+ * @param button Указатель на GtkButton, который вызвал событие.
+ * @param user_data Не используется в данной функции (NULL).
+ */
 void on_play_clicked(GtkButton *button, gpointer user_data) {
+    // Вызываем функцию play_melody с номером мелодии, который хранится в selected_melody.
     play_melody(selected_melody);
 }
 
+/**
+ * @brief Функция обратного вызова, вызываемая при закрытии главного окна приложения.
+ * Важна для корректной очистки ресурсов.
+ * @param widget Указатель на GtkWidget (в данном случае главное окно).
+ * @param data Не используется в данной функции (NULL).
+ */
 void on_destroy(GtkWidget *widget, gpointer data) {
-    buzzer_off();
-    gpiod_line_release(line);
-    gpiod_chip_close(chip);
-    gtk_main_quit();
+    buzzer_off();             // Убеждаемся, что зуммер выключен при завершении работы.
+    gpiod_line_release(line); // Освобождаем запрошенную линию GPIO.
+                              // Это очень важно, чтобы другие программы могли использовать этот пин.
+    gpiod_chip_close(chip);   // Закрываем открытый GPIO-чип, освобождая его ресурсы.
+    gtk_main_quit();          // Завершаем основной цикл GTK+, что приводит к завершению приложения.
 }
 
+// --- Главная функция программы ---
+
+/**
+ * @brief Точка входа в программу. Инициализирует GTK+ и libgpiod,
+ * создает графический интерфейс и запускает основной цикл обработки событий.
+ * @param argc Количество аргументов командной строки.
+ * @param argv Массив строк аргументов командной строки.
+ * @return Код завершения программы (0 при успешном выполнении, 1 при ошибке).
+ */
 int main(int argc, char *argv[]) {
+    // Инициализация библиотеки GTK+. Должна быть вызвана первой для любых GTK-приложений.
     gtk_init(&argc, &argv);
 
+    // --- Инициализация libgpiod ---
+    // Открываем GPIO-чип по его имени (например, "gpiochip0" на Raspberry Pi).
     chip = gpiod_chip_open_by_name(CHIP_NAME);
-    if (!chip) {
-        g_printerr("Failed to open GPIO chip\n");
-        return 1;
+    if (!chip) { // Проверяем, удалось ли открыть чип.
+        g_printerr("Failed to open GPIO chip\n"); // Выводим сообщение об ошибке в stderr.
+        return 1; // Завершаем программу с кодом ошибки.
     }
 
+    // Получаем указатель на конкретную линию GPIO (пин) по ее номеру.
     line = gpiod_chip_get_line(chip, BUZZER_LINE);
+    // Проверяем, удалось ли получить линию И запросить ее как выход.
+    // "buzzer" - это имя потребителя линии, которое отображается в sysfs.
+    // 0 - начальное значение линии (низкий уровень, зуммер выключен).
     if (!line || gpiod_line_request_output(line, "buzzer", 0) < 0) {
-        g_printerr("Failed to get/request line\n");
-        return 1;
+        g_printerr("Failed to get/request line\n"); // Выводим сообщение об ошибке.
+        // Перед выходом, если чип был открыт, его следует закрыть.
+        if (chip) gpiod_chip_close(chip);
+        return 1; // Завершаем программу с кодом ошибки.
     }
 
-    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), "Buzzer Melody");
-    gtk_window_set_default_size(GTK_WINDOW(window), 300, 200);
+    // --- Создание главного окна GTK+ ---
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL); // Создаем новое окно верхнего уровня.
+    gtk_window_set_title(GTK_WINDOW(window), "Buzzer Melody"); // Устанавливаем заголовок окна.
+    gtk_window_set_default_size(GTK_WINDOW(window), 300, 200); // Устанавливаем размер окна по умолчанию.
 
-    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    gtk_container_add(GTK_CONTAINER(window), vbox);
+    // --- Создание вертикального контейнера ---
+    // GtkBox - это контейнер, который упорядочивает виджеты в одном измерении (вертикально или горизонтально).
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10); // Создаем вертикальный контейнер с отступом 10 пикселей между дочерними элементами.
+    gtk_container_add(GTK_CONTAINER(window), vbox); // Добавляем этот контейнер в главное окно.
 
+    // --- Создание радиокнопок для выбора мелодий ---
+    // Создаем первую радиокнопку "Мелодия 1". NULL в первом аргументе означает, что это начало новой группы радиокнопок.
     GtkWidget *rb1 = gtk_radio_button_new_with_label(NULL, "Мелодия 1");
+    // Создаем вторую радиокнопку "Мелодия 2" и связываем ее с rb1, чтобы они были в одной группе.
     GtkWidget *rb2 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb1), "Мелодия 2");
+    // Создаем третью радиокнопку "Мелодия 3" и также связываем ее с rb1.
     GtkWidget *rb3 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb1), "Мелодия 3");
 
+    // Подключаем сигнал "toggled" (переключение состояния) каждой радиокнопки к функции on_melody_selected.
+    // GINT_TO_POINTER(X) преобразует целое число X в указатель, который передается как user_data.
+    // Это позволяет on_melody_selected узнать, какая мелодия была выбрана.
     g_signal_connect(rb1, "toggled", G_CALLBACK(on_melody_selected), GINT_TO_POINTER(1));
     g_signal_connect(rb2, "toggled", G_CALLBACK(on_melody_selected), GINT_TO_POINTER(2));
     g_signal_connect(rb3, "toggled", G_CALLBACK(on_melody_selected), GINT_TO_POINTER(3));
 
-    GtkWidget *play_btn = gtk_button_new_with_label("Проиграть");
+    // --- Создание кнопки "Проиграть" ---
+    GtkWidget *play_btn = gtk_button_new_with_label("Проиграть"); // Создаем кнопку с меткой "Проиграть".
+    // Подключаем сигнал "clicked" (нажатие) кнопки "Проиграть" к функции on_play_clicked.
+    // NULL в user_data означает, что никакие специфичные данные не передаются.
     g_signal_connect(play_btn, "clicked", G_CALLBACK(on_play_clicked), NULL);
 
+    // --- Упаковка виджетов в вертикальный контейнер ---
+    // gtk_box_pack_start добавляет виджет в начало контейнера.
+    // FALSE, FALSE - не расширять виджет, не занимать лишнее пространство.
+    // 5 или 10 - дополнительный отступ в пикселях.
     gtk_box_pack_start(GTK_BOX(vbox), rb1, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(vbox), rb2, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(vbox), rb3, FALSE, FALSE, 5);
     gtk_box_pack_start(GTK_BOX(vbox), play_btn, FALSE, FALSE, 10);
 
+    // --- Подключение функции для обработки закрытия окна ---
+    // Подключаем сигнал "destroy" (когда окно закрывается) к функции on_destroy.
+    // Это гарантирует корректную очистку ресурсов GPIO перед завершением программы.
     g_signal_connect(window, "destroy", G_CALLBACK(on_destroy), NULL);
 
-    gtk_widget_show_all(window);
-    gtk_main();
+    // --- Отображение GUI и запуск основного цикла GTK+ ---
+    gtk_widget_show_all(window); // Отображает все виджеты, содержащиеся в окне.
+    gtk_main(); // Запускает основной цикл обработки событий GTK+.
+                // Программа будет работать, пока gtk_main_quit() не будет вызвана.
 
-    return 0;
+    return 0; // Возвращаем 0, указывая на успешное завершение программы.
 }
