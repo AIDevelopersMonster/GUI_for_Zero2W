@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Глава 3: Игра „Двоичное Число“ и GPIO-индикация &mdash; документация GUI_for_Zero2W 0.1</title>
+      <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../static/css/theme.css" type="text/css" />
+  
+        <script data-url_root="../" id="documentation_options" src="../static/documentation_options.js"></script>
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/sphinx_highlight.js"></script>
+        <script src="../static/translations.js"></script>
+    <script src="../static/js/theme.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
+    <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="next" title="Глава 4: RGB LED Controller (GTK + pigpio)" href="../chapter04/index.html" />
+    <link rel="prev" title="Глава 2: Реакция на кнопку и тревожный индикатор" href="../chapter02/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GUI_for_Zero2W
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Меню навигации">
+              <p class="caption" role="heading"><span class="caption-text">Содержание:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../chapter01/index.html">Глава 1: Начало работы</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter02/index.html">Глава 2: Реакция на кнопку и тревожный индикатор</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Глава 3: Игра „Двоичное Число“ и GPIO-индикация</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Введение</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">Подключение компонентов</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">Принцип работы</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">Интерфейс</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">Код</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Важные моменты:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter04/index.html">Глава 4: RGB LED Controller (GTK + pigpio)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter05/index.html">Глава 5: Управление зуммером с помощью GTK+ и libgpiod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter06/index.html">Глава 6. Управление сервоприводом SG90 на Raspberry Pi</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Меню навигации для мобильных устройств" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GUI_for_Zero2W</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Навигация по страницам">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Глава 3: Игра „Двоичное Число“ и GPIO-индикация</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../sources/chapter03/index.rst.txt" rel="nofollow"> Просмотреть исходный код страницы</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gpio">
+<h1>Глава 3: Игра „Двоичное Число“ и GPIO-индикация<a class="headerlink" href="#gpio" title="Permalink to this heading"></a></h1>
+<p>В этой главе мы создадим интерактивную обучающую игру для Raspberry Pi Zero 2 W, которая поможет освоить двоичную систему счисления. Приложение будет использовать GPIO-пины для визуализации двоичных чисел с помощью светодиодов, а пользователь будет вводить десятичные эквиваленты через графический интерфейс.</p>
+<p>—</p>
+<section id="id1">
+<h2>Введение<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<p>Это приложение превратит ваш Raspberry Pi в увлекательный инструмент для практики перевода чисел из двоичной системы в десятичную. Оно будет генерировать случайные двоичные числа, отображать их на светодиодах, а вы будете вводить свои догадки через GUI. Мы также добавим подсчет правильных и неправильных ответов.</p>
+<p>—</p>
+</section>
+<section id="id2">
+<h2>Подключение компонентов<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
+<p>Для этой главы нам понадобятся следующие компоненты и их подключение к Raspberry Pi:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>8 светодиодов с резисторами 220 Ом каждый</strong>: Подключаются к следующим GPIO-пинам (каждый светодиод через резистор к пину, а другой конец светодиода к GND):</dt><dd><ul>
+<li><p><strong>GPIO17 (пин 11)</strong></p></li>
+<li><p><strong>GPIO18 (пин 12)</strong></p></li>
+<li><p><strong>GPIO27 (пин 13)</strong></p></li>
+<li><p><strong>GPIO22 (пин 15)</strong></p></li>
+<li><p><strong>GPIO23 (пин 16)</strong></p></li>
+<li><p><strong>GPIO24 (пин 18)</strong></p></li>
+<li><p><strong>GPIO25 (пин 22)</strong></p></li>
+<li><p><strong>GPIO4 (пин 7)</strong></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Ниже представлена схема подключения светодиодов:</p>
+<img alt="" class="align-center" src="static/chapter03_schematic.png" />
+<p>—</p>
+<table class="docutils align-default" id="id7">
+<caption><span class="caption-text">Соответствие GPIO-пинов и битов</span><a class="headerlink" href="#id7" title="Постоянная ссылка на таблицу"></a></caption>
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Индекс бита (в коде)</p></th>
+<th class="head"><p>GPIO-пин (BCM)</p></th>
+<th class="head"><p>Физический пин</p></th>
+<th class="head"><p>Значимость бита</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>GPIO4</p></td>
+<td><p>7</p></td>
+<td><p>Младший бит (LSB)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>GPIO25</p></td>
+<td><p>22</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>GPIO24</p></td>
+<td><p>18</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>GPIO23</p></td>
+<td><p>16</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>GPIO22</p></td>
+<td><p>15</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p>GPIO27</p></td>
+<td><p>13</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>GPIO18</p></td>
+<td><p>12</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>7</p></td>
+<td><p>GPIO17</p></td>
+<td><p>11</p></td>
+<td><p>Старший бит (MSB)</p></td>
+</tr>
+</tbody>
+</table>
+<p>—</p>
+</section>
+<section id="id3">
+<h2>Принцип работы<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h2>
+<p>Логика игры будет следующей:</p>
+<ol class="arabic simple">
+<li><p><strong>Начало игры</strong>: При нажатии кнопки «Старт» приложение генерирует случайное число от 0 до 255.</p></li>
+<li><p><strong>Двоичная индикация</strong>: Это число преобразуется в 8-битное двоичное представление. Каждый бит этого числа управляет состоянием одного из восьми светодиодов: если бит равен 1, соответствующий светодиод включается; если 0 — выключается.</p></li>
+<li><p><strong>Пользовательский ввод</strong>: Игрок вводит десятичное число, которое, по его мнению, соответствует двоичному числу, отображаемому на светодиодах, в текстовое поле.</p></li>
+<li><p><strong>Проверка ответа</strong>: При нажатии кнопки «Ваш ответ» приложение сравнивает введенное пользователем число с загаданным.</p></li>
+<li><p><strong>Подсчет очков</strong>: В зависимости от правильности ответа, обновляются счетчики «Правильных» и «Ошибок».</p></li>
+<li><p><strong>Новое число</strong>: После каждого ответа генерируется новое случайное число, и светодиоды обновляются.</p></li>
+<li><p><strong>Завершение игры</strong>: Кнопка «Стоп» сбрасывает все светодиоды и останавливает игру.</p></li>
+</ol>
+<p>Для взаимодействия с GPIO используется библиотека <cite>libgpiod</cite>, а графический интерфейс построен с помощью <cite>GTK+3</cite>.</p>
+<p>—</p>
+</section>
+<section id="id4">
+<h2>Интерфейс<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h2>
+<p>Графический интерфейс игры будет включать следующие элементы:</p>
+<ul class="simple">
+<li><p><strong>8 цветных квадратов/кругов</strong>: Визуальное представление светодиодов на экране. Они будут менять цвет (например, с белого на красный), имитируя включение/выключение.</p></li>
+<li><p><strong>Поле ввода</strong>: Для ввода пользователем десятичного числа.</p></li>
+<li><dl class="simple">
+<dt><strong>Кнопки управления</strong>:</dt><dd><ul>
+<li><p>«Старт»: Начинает игру и генерирует первое число.</p></li>
+<li><p>«Ваш ответ»: Проверяет введенный ответ и генерирует следующее число.</p></li>
+<li><p>«Стоп»: Завершает игру и сбрасывает счетчики.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><strong>Счетчики</strong>: Два лейбла, отображающие количество правильных ответов и ошибок.</p></li>
+</ul>
+<p>Вот как может выглядеть макет GUI:</p>
+<img alt="" class="align-center" src="static/chapter03_gui_mockup.png" />
+<p>—</p>
+</section>
+<section id="id5">
+<h2>Код<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h2>
+<p>Ниже представлен полный C-код для реализации описанной функциональности.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;gtk/gtk.h&gt;</span><span class="c1">       // Подключаем библиотеку GTK для создания графического интерфейса</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;gpiod.h&gt;</span><span class="c1">         // Подключаем библиотеку libgpiod для работы с GPIO</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span><span class="c1">        // Подключаем стандартную библиотеку для функций, таких как rand() и atoi()</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;time.h&gt;</span><span class="c1">          // Подключаем библиотеку для работы со временем, используемой для инициализации rand()</span>
+
+<span class="c1">// Определение констант для имени GPIO-чипа и потребителя (имя, которое будет видно в системе)</span>
+<span class="cp">#define CHIPNAME &quot;gpiochip0&quot;</span>
+<span class="cp">#define CONSUMER &quot;BinaryGame&quot;</span>
+
+<span class="c1">// Массив номеров GPIO-пинов, к которым подключены светодиоды</span>
+<span class="c1">// Эти пины будут использоваться для отображения 8-битного двоичного числа</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">gpio_pins</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">27</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">};</span>
+
+<span class="c1">// Структура для хранения всех данных приложения, включая указатели на виджеты GTK,</span>
+<span class="c1">// линии GPIO, счетчики игры и состояние игры.</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">gpiod_chip</span><span class="w"> </span><span class="o">*</span><span class="n">chip</span><span class="p">;</span><span class="w">          </span><span class="c1">// Указатель на GPIO-чип</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">gpiod_line</span><span class="w"> </span><span class="o">*</span><span class="n">lines</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span><span class="w">      </span><span class="c1">// Массив указателей на линии GPIO для светодиодов</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">entry</span><span class="p">;</span><span class="w">                 </span><span class="c1">// Указатель на виджет поля ввода (GtkEntry)</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">correct_label</span><span class="p">;</span><span class="w">         </span><span class="c1">// Указатель на лейбл для отображения количества правильных ответов (GtkLabel)</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">wrong_label</span><span class="p">;</span><span class="w">           </span><span class="c1">// Указатель на лейбл для отображения количества ошибок (GtkLabel)</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">start_button</span><span class="p">;</span><span class="w">          </span><span class="c1">// Указатель на кнопку &quot;Старт&quot; (GtkButton)</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">stop_button</span><span class="p">;</span><span class="w">           </span><span class="c1">// Указатель на кнопку &quot;Стоп&quot; (GtkButton)</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">submit_button</span><span class="p">;</span><span class="w">         </span><span class="c1">// Указатель на кнопку &quot;Ваш ответ&quot; (GtkButton)</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">led_indicators</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span><span class="w">     </span><span class="c1">// Массив указателей на виджеты-лейблы, имитирующие светодиоды в GUI</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">correct_count</span><span class="p">;</span><span class="w">                </span><span class="c1">// Счетчик правильных ответов</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">wrong_count</span><span class="p">;</span><span class="w">                  </span><span class="c1">// Счетчик ошибок</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">current_value</span><span class="p">;</span><span class="w">                </span><span class="c1">// Текущее загаданное десятичное число</span>
+<span class="w">    </span><span class="n">gboolean</span><span class="w"> </span><span class="n">game_running</span><span class="p">;</span><span class="w">            </span><span class="c1">// Флаг состояния игры (TRUE - игра активна, FALSE - нет)</span>
+<span class="p">};</span>
+
+<span class="c1">// Функция update_leds: Устанавливает состояние физических светодиодов и их GUI-индикаторов</span>
+<span class="c1">// в соответствии с двоичным представлением заданного числа.</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">update_leds</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Извлекаем i-й бит из числа &#39;value&#39;</span>
+<span class="w">        </span><span class="c1">// Оператор &gt;&gt; (побитовый сдвиг вправо) сдвигает биты числа на &#39;i&#39; позиций вправо.</span>
+<span class="w">        </span><span class="c1">// Оператор &amp; 1 (побитовое И с 1) извлекает самый младший бит (то есть, текущий i-й бит).</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">bit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="c1">// Устанавливаем значение на соответствующей GPIO-линии.</span>
+<span class="w">        </span><span class="c1">// 0 - выключить светодиод, 1 - включить светодиод.</span>
+<span class="w">        </span><span class="n">gpiod_line_set_value</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">bit</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// Визуально обновляем индикатор в GUI:</span>
+<span class="w">        </span><span class="c1">// Делаем его видимым (включенным), если бит равен 1, и невидимым (выключенным), если бит равен 0.</span>
+<span class="w">        </span><span class="n">gtk_widget_set_visible</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">led_indicators</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">bit</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Функция reset_leds: Выключает все физические светодиоды и их GUI-индикаторы.</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">reset_leds</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">update_leds</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Вызываем update_leds с значением 0, чтобы выключить все светодиоды</span>
+<span class="p">}</span>
+
+<span class="c1">// Обработчик кнопки &quot;Старт&quot;: Начинает новую игру.</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">start_game</span><span class="p">(</span><span class="n">GtkButton</span><span class="w"> </span><span class="o">*</span><span class="n">btn</span><span class="p">,</span><span class="w"> </span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">user_data</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Генерируем случайное число от 0 до 255.</span>
+<span class="w">    </span><span class="c1">// rand() % 256 дает остаток от деления на 256, что гарантирует число в диапазоне [0, 255].</span>
+<span class="w">    </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">current_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">256</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Обновляем светодиоды в соответствии с новым загаданным числом.</span>
+<span class="w">    </span><span class="n">update_leds</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">current_value</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Устанавливаем флаг, что игра запущена.</span>
+<span class="w">    </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">game_running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TRUE</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Очищаем текстовое поле ввода, чтобы пользователь мог ввести новый ответ.</span>
+<span class="w">    </span><span class="n">gtk_entry_set_text</span><span class="p">(</span><span class="n">GTK_ENTRY</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">entry</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Обработчик кнопки &quot;Ваш ответ&quot;: Проверяет ответ пользователя.</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">check_answer</span><span class="p">(</span><span class="n">GtkButton</span><span class="w"> </span><span class="o">*</span><span class="n">btn</span><span class="p">,</span><span class="w"> </span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">user_data</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Если игра не запущена, игнорируем нажатие кнопки &quot;Ваш ответ&quot;.</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">game_running</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Получаем текст из поля ввода.</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_entry_get_text</span><span class="p">(</span><span class="n">GTK_ENTRY</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">entry</span><span class="p">));</span>
+<span class="w">    </span><span class="c1">// Преобразуем введенную строку в целое число.</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">user_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">atoi</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Сравниваем ответ пользователя с текущим загаданным числом.</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">user_value</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">current_value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">correct_count</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">// Увеличиваем счетчик правильных ответов.</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">wrong_count</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">// Увеличиваем счетчик ошибок.</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Обновляем текст на лейблах, отображающих статистику.</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">buf</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span><span class="w"> </span><span class="c1">// Буфер для форматирования строк</span>
+<span class="w">    </span><span class="n">snprintf</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Правильных: %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">correct_count</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">correct_label</span><span class="p">),</span><span class="w"> </span><span class="n">buf</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">snprintf</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Ошибок: %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">wrong_count</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">wrong_label</span><span class="p">),</span><span class="w"> </span><span class="n">buf</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Генерируем новое случайное число для следующего раунда игры.</span>
+<span class="w">    </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">current_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">256</span><span class="p">;</span>
+<span class="w">    </span><span class="n">update_leds</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">current_value</span><span class="p">);</span><span class="w"> </span><span class="c1">// Обновляем светодиоды для нового числа.</span>
+<span class="w">    </span><span class="n">gtk_entry_set_text</span><span class="p">(</span><span class="n">GTK_ENTRY</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">entry</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Очищаем поле ввода для нового ответа.</span>
+<span class="p">}</span>
+
+<span class="c1">// Обработчик кнопки &quot;Стоп&quot;: Завершает текущую игру.</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">stop_game</span><span class="p">(</span><span class="n">GtkButton</span><span class="w"> </span><span class="o">*</span><span class="n">btn</span><span class="p">,</span><span class="w"> </span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">user_data</span><span class="p">;</span>
+<span class="w">    </span><span class="n">reset_leds</span><span class="p">(</span><span class="n">data</span><span class="p">);</span><span class="w"> </span><span class="c1">// Выключаем все светодиоды.</span>
+<span class="w">    </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">game_running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"> </span><span class="c1">// Устанавливаем флаг, что игра остановлена.</span>
+<span class="w">    </span><span class="c1">// Сбрасываем счетчики правильных и неправильных ответов.</span>
+<span class="w">    </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">correct_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">wrong_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Обновляем лейблы статистики.</span>
+<span class="w">    </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">correct_label</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Правильных: 0&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">wrong_label</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Ошибок: 0&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_entry_set_text</span><span class="p">(</span><span class="n">GTK_ENTRY</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">entry</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Очищаем поле ввода.</span>
+<span class="p">}</span>
+
+<span class="c1">// Обработчик сигнала &quot;destroy&quot; окна: Освобождает все захваченные ресурсы и завершает приложение.</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">on_destroy</span><span class="p">(</span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">widget</span><span class="p">,</span><span class="w"> </span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">user_data</span><span class="p">;</span>
+<span class="w">    </span><span class="n">reset_leds</span><span class="p">(</span><span class="n">data</span><span class="p">);</span><span class="w"> </span><span class="c1">// Убедимся, что все светодиоды выключены перед выходом.</span>
+
+<span class="w">    </span><span class="c1">// Освобождаем каждую GPIO-линию, которая была запрошена.</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// Проверяем, что указатель на линию не NULL (т.е. линия была успешно получена)</span>
+<span class="w">            </span><span class="n">gpiod_line_release</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Закрываем GPIO-чип.</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">chip</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// Проверяем, что указатель на чип не NULL (т.е. чип был успешно открыт)</span>
+<span class="w">        </span><span class="n">gpiod_chip_close</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">chip</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">gtk_main_quit</span><span class="p">();</span><span class="w"> </span><span class="c1">// Завершаем основной цикл обработки событий GTK, что приводит к завершению приложения.</span>
+<span class="p">}</span>
+
+<span class="c1">// Главная функция приложения, точка входа.</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">gtk_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">argv</span><span class="p">);</span><span class="w"> </span><span class="c1">// Инициализация библиотеки GTK. Это должно быть вызвано в начале.</span>
+<span class="w">    </span><span class="n">srand</span><span class="p">(</span><span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">));</span><span class="w"> </span><span class="c1">// Инициализация генератора случайных чисел.</span>
+<span class="w">                       </span><span class="c1">// time(NULL) возвращает текущее время, обеспечивая разную последовательность чисел при каждом запуске.</span>
+
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">app_data</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span><span class="w"> </span><span class="c1">// Создаем и инициализируем нулями структуру app_data.</span>
+<span class="w">    </span><span class="n">data</span><span class="p">.</span><span class="n">correct_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">     </span><span class="c1">// Устанавливаем начальное количество правильных ответов.</span>
+<span class="w">    </span><span class="n">data</span><span class="p">.</span><span class="n">wrong_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">       </span><span class="c1">// Устанавливаем начальное количество ошибок.</span>
+<span class="w">    </span><span class="n">data</span><span class="p">.</span><span class="n">game_running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w">  </span><span class="c1">// Игра изначально не запущена.</span>
+
+<span class="w">    </span><span class="c1">// Инициализация GPIO</span>
+<span class="w">    </span><span class="n">data</span><span class="p">.</span><span class="n">chip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gpiod_chip_open_by_name</span><span class="p">(</span><span class="n">CHIPNAME</span><span class="p">);</span><span class="w"> </span><span class="c1">// Открываем GPIO-чип по его имени.</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">data</span><span class="p">.</span><span class="n">chip</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">perror</span><span class="p">(</span><span class="s">&quot;Ошибка: не удалось открыть GPIO chip&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Выводим сообщение об ошибке, если чип не открылся.</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="c1">// Завершаем программу с кодом ошибки.</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Запрашиваем и настраиваем все 8 GPIO-линий как выходы.</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Получаем указатель на конкретную GPIO-линию по ее номеру.</span>
+<span class="w">        </span><span class="n">data</span><span class="p">.</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gpiod_chip_get_line</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">chip</span><span class="p">,</span><span class="w"> </span><span class="n">gpio_pins</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">        </span><span class="c1">// Запрашиваем линию как выход с начальным значением 0 (выключено).</span>
+<span class="w">        </span><span class="c1">// Проверяем, что линия получена и запрос успешен.</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">data</span><span class="p">.</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">gpiod_line_request_output</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">CONSUMER</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">perror</span><span class="p">(</span><span class="s">&quot;Ошибка: не удалось настроить пины&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Сообщение об ошибке.</span>
+<span class="w">            </span><span class="c1">// В случае ошибки, освобождаем все линии, которые были успешно запрошены до этого.</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">lines</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="n">gpiod_line_release</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">lines</span><span class="p">[</span><span class="n">j</span><span class="p">]);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">gpiod_chip_close</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">chip</span><span class="p">);</span><span class="w"> </span><span class="c1">// Закрываем чип.</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="c1">// Завершаем программу.</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Создание и настройка GTK интерфейса</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_window_new</span><span class="p">(</span><span class="n">GTK_WINDOW_TOPLEVEL</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем главное окно приложения.</span>
+<span class="w">    </span><span class="n">gtk_window_set_title</span><span class="p">(</span><span class="n">GTK_WINDOW</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Игра: Двоичное Число&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Устанавливаем заголовок окна.</span>
+<span class="w">    </span><span class="n">gtk_window_set_default_size</span><span class="p">(</span><span class="n">GTK_WINDOW</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="mi">400</span><span class="p">,</span><span class="w"> </span><span class="mi">300</span><span class="p">);</span><span class="w"> </span><span class="c1">// Устанавливаем размер окна по умолчанию.</span>
+<span class="w">    </span><span class="c1">// Подключаем обработчик сигнала &quot;destroy&quot; (закрытие окна) к функции on_destroy.</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">window</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;destroy&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">on_destroy</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">data</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">vbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_box_new</span><span class="p">(</span><span class="n">GTK_ORIENTATION_VERTICAL</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем вертикальный контейнер с отступом 10 пикселей.</span>
+<span class="w">    </span><span class="n">gtk_container_add</span><span class="p">(</span><span class="n">GTK_CONTAINER</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="n">vbox</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем контейнер в главное окно.</span>
+
+<span class="w">    </span><span class="c1">// Контейнер для светодиодов (визуальное представление битов)</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">led_box</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_box_new</span><span class="p">(</span><span class="n">GTK_ORIENTATION_HORIZONTAL</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем горизонтальный контейнер для 8 &quot;светодиодов&quot; с отступом 5 пикселей.</span>
+<span class="w">    </span><span class="c1">// Создаем 8 виджетов-лейблов, которые будут имитировать светодиоды.</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">--</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// Идем от 7 к 0, чтобы старший бит (самый значимый) был слева в GUI.</span>
+<span class="w">        </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">led</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;⬤&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Используем Unicode символ &quot;черный круг&quot; как &quot;светодиод&quot;.</span>
+<span class="w">        </span><span class="n">gtk_widget_set_visible</span><span class="p">(</span><span class="n">led</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">);</span><span class="w"> </span><span class="c1">// Изначально все &quot;светодиоды&quot; выключены (невидимы).</span>
+<span class="w">        </span><span class="n">gtk_widget_set_name</span><span class="p">(</span><span class="n">led</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;led&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Устанавливаем имя для CSS-стилизации (если потребуется).</span>
+<span class="w">        </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">led_box</span><span class="p">),</span><span class="w"> </span><span class="n">led</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем &quot;светодиод&quot; в горизонтальный контейнер.</span>
+<span class="w">        </span><span class="n">data</span><span class="p">.</span><span class="n">led_indicators</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">led</span><span class="p">;</span><span class="w"> </span><span class="c1">// Сохраняем указатель на виджет в структуре данных.</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">led_box</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем контейнер светодиодов в основной вертикальный контейнер.</span>
+
+<span class="w">    </span><span class="c1">// Поле ввода для ответа пользователя</span>
+<span class="w">    </span><span class="n">data</span><span class="p">.</span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_entry_new</span><span class="p">();</span><span class="w"> </span><span class="c1">// Создаем новое текстовое поле ввода.</span>
+<span class="w">    </span><span class="n">gtk_entry_set_placeholder_text</span><span class="p">(</span><span class="n">GTK_ENTRY</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">entry</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Введите число&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Устанавливаем текст-подсказку.</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">entry</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем поле ввода в основной контейнер.</span>
+
+<span class="w">    </span><span class="c1">// Контейнер для кнопок управления игрой</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">button_box</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_box_new</span><span class="p">(</span><span class="n">GTK_ORIENTATION_HORIZONTAL</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span><span class="w"> </span><span class="c1">// Горизонтальный контейнер для кнопок.</span>
+<span class="w">    </span><span class="n">data</span><span class="p">.</span><span class="n">start_button</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_button_new_with_label</span><span class="p">(</span><span class="s">&quot;Старт&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем кнопку &quot;Старт&quot;.</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">start_button</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;clicked&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">start_game</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">data</span><span class="p">);</span><span class="w"> </span><span class="c1">// Подключаем обработчик нажатия.</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">button_box</span><span class="p">),</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">start_button</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем кнопку.</span>
+
+<span class="w">    </span><span class="n">data</span><span class="p">.</span><span class="n">submit_button</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_button_new_with_label</span><span class="p">(</span><span class="s">&quot;Ваш ответ&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем кнопку &quot;Ваш ответ&quot;.</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">submit_button</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;clicked&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">check_answer</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">data</span><span class="p">);</span><span class="w"> </span><span class="c1">// Подключаем обработчик.</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">button_box</span><span class="p">),</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">submit_button</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем кнопку.</span>
+
+<span class="w">    </span><span class="n">data</span><span class="p">.</span><span class="n">stop_button</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_button_new_with_label</span><span class="p">(</span><span class="s">&quot;Стоп&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем кнопку &quot;Стоп&quot;.</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">stop_button</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;clicked&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">stop_game</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">data</span><span class="p">);</span><span class="w"> </span><span class="c1">// Подключаем обработчик.</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">button_box</span><span class="p">),</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">stop_button</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем кнопку.</span>
+
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">button_box</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем контейнер кнопок в основной контейнер.</span>
+
+<span class="w">    </span><span class="c1">// Лейблы для отображения статистики (правильных/неправильных ответов)</span>
+<span class="w">    </span><span class="n">data</span><span class="p">.</span><span class="n">correct_label</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;Правильных: 0&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем лейбл для правильных ответов.</span>
+<span class="w">    </span><span class="n">data</span><span class="p">.</span><span class="n">wrong_label</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;Ошибок: 0&quot;</span><span class="p">);</span><span class="w">       </span><span class="c1">// Создаем лейбл для ошибок.</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">correct_label</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем лейбл в основной контейнер.</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">wrong_label</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">   </span><span class="c1">// Добавляем лейбл в основной контейнер.</span>
+
+<span class="w">    </span><span class="n">gtk_widget_show_all</span><span class="p">(</span><span class="n">window</span><span class="p">);</span><span class="w"> </span><span class="c1">// Отображаем все виджеты, содержащиеся в окне.</span>
+<span class="w">    </span><span class="n">gtk_main</span><span class="p">();</span><span class="w"> </span><span class="c1">// Запускаем основной цикл обработки событий GTK. Приложение будет активно до вызова gtk_main_quit().</span>
+
+<span class="w">    </span><span class="c1">// Ресурсы GPIO освобождаются в on_destroy, но здесь можно добавить дополнительную очистку,</span>
+<span class="w">    </span><span class="c1">// если on_destroy не будет вызвана (например, при аварийном завершении).</span>
+<span class="w">    </span><span class="c1">// В данном случае on_destroy гарантированно вызывается при закрытии окна.</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// Успешное завершение программы.</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Компиляция и запуск
+Для компиляции и запуска этой игры на вашем Raspberry Pi Zero 2 W выполните следующие шаги:</p>
+<p>Сохраните код:
+Сохраните приведенный выше C-код в файл, например, binary_game.c.</p>
+<p>Компиляция:
+Откройте терминал на вашем Raspberry Pi и перейдите в директорию, где вы сохранили файл binary_game.c. Затем выполните следующую команду:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gcc<span class="w"> </span>binary_game.c<span class="w"> </span>-o<span class="w"> </span>binary_game<span class="w"> </span><span class="k">$(</span>pkg-config<span class="w"> </span>--cflags<span class="w"> </span>--libs<span class="w"> </span>gtk+-3.0<span class="w"> </span>libgpiod<span class="k">)</span><span class="w"> </span>-Wall<span class="w"> </span>-Wextra
+</pre></div>
+</div>
+<p>gcc: Компилятор C.</p>
+<p>binary_game.c: Исходный файл с вашим кодом.</p>
+<p>-o binary_game: Имя выходного исполняемого файла, который будет создан после компиляции.</p>
+<p>$(pkg-config –cflags –libs gtk+-3.0 libgpiod): Эта команда автоматически находит необходимые флаги компилятора (–cflags) и библиотеки (–libs) для GTK3 и libgpiod, упрощая процесс компиляции.</p>
+<p>-Wall -Wextra: Включает все стандартные и дополнительные предупреждения компилятора, что помогает выявлять потенциальные ошибки и улучшать качество кода.</p>
+<p>Запуск:
+После успешной компиляции запустите программу, выполнив в терминале:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./binary_game
+</pre></div>
+</div>
+<p>Теперь вы должны увидеть окно GTK с игрой «Двоичное Число». Нажмите «Старт», чтобы начать игру, и попробуйте угадать десятичное значение, отображаемое на светодиодах!</p>
+<p>Создание ярлыка (Launcher) для рабочего стола
+Чтобы запускать игру прямо с рабочего стола Raspberry Pi OS без использования терминала, вы можете создать файл .desktop (ярлык).</p>
+<p>Откройте текстовый редактор (например, nano или geany) на вашем Raspberry Pi.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nano<span class="w"> </span>~/.local/share/applications/binary_game.desktop
+</pre></div>
+</div>
+<p>(Если папки ~/.local/share/applications/ не существует, создайте ее: mkdir -p ~/.local/share/applications/)</p>
+<p>Вставьте следующее содержимое в файл binary_game.desktop:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>Desktop<span class="w"> </span>Entry<span class="o">]</span>
+<span class="nv">Version</span><span class="o">=</span><span class="m">1</span>.0
+<span class="nv">Type</span><span class="o">=</span>Application
+<span class="nv">Name</span><span class="o">=</span>Игра<span class="w"> </span><span class="s2">&quot;Двоичное Число&quot;</span>
+<span class="nv">Comment</span><span class="o">=</span>Обучающая<span class="w"> </span>игра<span class="w"> </span>для<span class="w"> </span>Raspberry<span class="w"> </span>Pi:<span class="w"> </span>угадай<span class="w"> </span>двоичное<span class="w"> </span>число
+<span class="nv">Exec</span><span class="o">=</span>/home/alex/projects/Github/GUI_for_Zero2W/binary_game
+<span class="nv">Icon</span><span class="o">=</span>applications-games
+<span class="nv">Terminal</span><span class="o">=</span><span class="nb">false</span>
+<span class="nv">Categories</span><span class="o">=</span>Game<span class="p">;</span>Education<span class="p">;</span>
+</pre></div>
+</div>
+<section id="id6">
+<h3>Важные моменты:<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<p><strong>Exec:</strong> Укажите полный путь к вашему исполняемому файлу binary_game. Убедитесь, что путь /home/alex/projects/Github/GUI_for_Zero2W/ соответствует фактическому расположению вашего проекта.</p>
+<p><strong>Icon:</strong> Вы можете использовать стандартные иконки системы (например, applications-games, education-science, utilities-terminal) или указать путь к собственному файлу иконки (например, /home/alex/projects/Github/GUI_for_Zero2W/icon.png).</p>
+<p><strong>Terminal=false</strong>: Указывает, что приложение не требует запуска в терминале. Если ваше приложение выводит что-то важное в терминал, можете установить true.</p>
+<p>Сохраните файл (Ctrl+O, Enter, Ctrl+X для nano).</p>
+<p>Сделайте ярлык исполняемым:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/share/applications/binary_game.desktop
+</pre></div>
+</div>
+<p>Теперь вы должны увидеть ярлык «Игра „Двоичное Число“» в меню приложений (обычно в разделе «Игры» или «Образование») или на рабочем столе. Возможно, потребуется перезагрузить рабочий стол или систему, чтобы ярлык появился.</p>
+<p>Поздравляю!</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Нижняя область">
+        <a href="../chapter02/index.html" class="btn btn-neutral float-left" title="Глава 2: Реакция на кнопку и тревожный индикатор" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Предыдущая</a>
+        <a href="../chapter04/index.html" class="btn btn-neutral float-right" title="Глава 4: RGB LED Controller (GTK + pigpio)" accesskey="n" rel="next">Следующая <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alex Malachevsky.</p>
+  </div>
+
+  Собрано при помощи <a href="https://www.sphinx-doc.org/">Sphinx</a> с использованием
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы,</a>
+    предоставленной <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
