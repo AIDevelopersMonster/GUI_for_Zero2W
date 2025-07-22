@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Глава 6. Управление сервоприводом SG90 на Raspberry Pi &mdash; документация GUI_for_Zero2W 0.1</title>
+      <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../static/css/theme.css" type="text/css" />
+  
+        <script data-url_root="../" id="documentation_options" src="../static/documentation_options.js"></script>
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/sphinx_highlight.js"></script>
+        <script src="../static/translations.js"></script>
+    <script src="../static/js/theme.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
+    <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="prev" title="Глава 5: Управление зуммером с помощью GTK+ и libgpiod" href="../chapter05/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GUI_for_Zero2W
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Меню навигации">
+              <p class="caption" role="heading"><span class="caption-text">Содержание:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../chapter01/index.html">Глава 1: Начало работы</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter02/index.html">Глава 2: Реакция на кнопку и тревожный индикатор</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter03/index.html">Глава 3: Игра „Двоичное Число“ и GPIO-индикация</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter04/index.html">Глава 4: RGB LED Controller (GTK + pigpio)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter05/index.html">Глава 5: Управление зуммером с помощью GTK+ и libgpiod</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Глава 6. Управление сервоприводом SG90 на Raspberry Pi</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sg90">Технические характеристики SG90</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Подключение</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cli">Управление через CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">Графический интерфейс</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pigpiod">Особенности запуска <cite>pigpiod</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">Выводы</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Меню навигации для мобильных устройств" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GUI_for_Zero2W</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Навигация по страницам">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Глава 6. Управление сервоприводом SG90 на Raspberry Pi</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../sources/chapter06/index.rst.txt" rel="nofollow"> Просмотреть исходный код страницы</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sg90-raspberry-pi">
+<h1>Глава 6. Управление сервоприводом SG90 на Raspberry Pi<a class="headerlink" href="#sg90-raspberry-pi" title="Permalink to this heading"></a></h1>
+<p>В данной главе рассматривается подключение и управление сервоприводом SG90 с использованием библиотеки <cite>pigpio</cite> на Raspberry Pi Zero 2W. Мы исследуем характеристики SG90, принципы работы сервомашинок и демонстрируем работу через CLI и GUI-приложение.</p>
+<p>—</p>
+<section id="sg90">
+<h2>Технические характеристики SG90<a class="headerlink" href="#sg90" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Угол поворота</strong>: 0–180 градусов</p></li>
+<li><p><strong>Управление</strong>: широтно-импульсная модуляция (ШИМ)</p></li>
+<li><p><strong>Ширина импульса</strong>: от 500 до 2500 микросекунд (для углов от 0 до 180°)</p></li>
+<li><p><strong>Напряжение питания</strong>: 4.8–6 В</p></li>
+</ul>
+<p>—</p>
+</section>
+<section id="id1">
+<h2>Подключение<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<p>Сервопривод SG90 подключается следующим образом:</p>
+<ul class="simple">
+<li><p><strong>VCC</strong> (обычно красный провод) — к 5V на Raspberry Pi</p></li>
+<li><p><strong>GND</strong> (обычно коричневый/черный провод) — к GND на Raspberry Pi</p></li>
+<li><p><strong>Signal</strong> (обычно оранжевый/жёлтый провод) — к <strong>GPIO17</strong> или GPIO18 (в нашем случае используем GPIO17)</p></li>
+</ul>
+<p>—</p>
+</section>
+<section id="cli">
+<h2>Управление через CLI<a class="headerlink" href="#cli" title="Permalink to this heading"></a></h2>
+<p>Для управления сервомотором используется демон <cite>pigpiod</cite> и утилита <cite>pigs</cite>. Демон <cite>pigpiod</cite> должен быть запущен в фоновом режиме, чтобы утилита <cite>pigs</cite> могла с ним взаимодействовать.</p>
+<p><strong>Важное примечание:</strong> Демон <cite>pigpiod</cite> у вас запускается через <cite>crontab</cite> при загрузке системы, что является надёжным способом обеспечения его работы. Если по какой-то причине он не запущен, команды <cite>pigs</cite> не будут работать.</p>
+<p>Примеры команд для управления сервоприводом из командной строки:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Если pigpiod не запущен через cron, его можно запустить вручную (обычно не требуется):</span>
+<span class="c1"># sudo pigpiod -l</span>
+
+pigs<span class="w"> </span>s<span class="w"> </span><span class="m">17</span><span class="w"> </span><span class="m">1500</span><span class="w">  </span><span class="c1"># Установить сервопривод на GPIO17 в центральное положение (примерно 90°)</span>
+pigs<span class="w"> </span>s<span class="w"> </span><span class="m">17</span><span class="w"> </span><span class="m">1000</span><span class="w">  </span><span class="c1"># Повернуть сервопривод на GPIO17 влево (примерно ~45°)</span>
+pigs<span class="w"> </span>s<span class="w"> </span><span class="m">17</span><span class="w"> </span><span class="m">2000</span><span class="w">  </span><span class="c1"># Повернуть сервопривод на GPIO17 вправо (примерно ~135°)</span>
+</pre></div>
+</div>
+<p><strong>Диапазон командной ширины импульса для SG90:</strong></p>
+<ul class="simple">
+<li><p><strong>500</strong> микросекунд — соответствует минимальному углу (приблизительно 0°)</p></li>
+<li><p><strong>2500</strong> микросекунд — соответствует максимальному углу (приблизительно 180°)</p></li>
+</ul>
+<p>—</p>
+</section>
+<section id="id2">
+<h2>Графический интерфейс<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
+<p>Для более наглядного и интерактивного управления сервомотором мы разработали простое GUI-приложение с использованием библиотеки <strong>GTK+</strong>.</p>
+<p>### Исходный код <cite>servo_gui.c</cite></p>
+<p>Ниже представлен полный исходный код нашего GTK-приложения для управления сервоприводом, включая подробные комментарии, объясняющие каждую часть:</p>
+<div class="highlight-servo_gui.c notranslate"><div class="highlight"><pre><span></span>  #include &lt;gtk/gtk.h&gt;    // Включаем заголовочный файл для библиотеки GTK+ (для создания графического интерфейса пользователя)
+  #include &lt;stdlib.h&gt;     // Включаем заголовочный файл для стандартных функций, таких как system() и snprintf()
+  #include &lt;stdio.h&gt;      // Включаем заголовочный файл для snprintf() - используется для форматирования строки команды
+
+  // --- Функции управления сервоприводом ---
+
+ /**
+   * @brief Устанавливает положение сервопривода, отправляя команду через pigs.
+   * @param pulsewidth Ширина импульса в микросекундах (обычно от 500 до 2500 для SG90).
+   * 1500 us обычно соответствует центральному положению.
+ */
+ void set_servo(int pulsewidth) {
+    char cmd[64]; // Создаем буфер для хранения строки команды.
+                  // Достаточно большой для команды &quot;pigs s 17 2500&quot; и завершающего нуля.
+
+    // Форматируем строку команды: &quot;pigs s 17 [pulsewidth]&quot;.
+    // &quot;pigs s&quot; - команда pigs для установки ширины импульса (серво).
+    // &quot;17&quot; - номер GPIO-пина, к которому подключен сервопривод (GPIO17).
+    // &quot;%d&quot; - placeholder для значения pulsewidth.
+    snprintf(cmd, sizeof(cmd), &quot;pigs s 17 %d&quot;, pulsewidth);
+
+    // Выполняем команду в системной оболочке.
+    // Это запускает внешний инструмент &#39;pigs&#39;, который управляет сервоприводом.
+    // Важно: для работы &#39;pigs&#39; должен быть запущен демон pigpiod, и у пользователя должны быть права.
+    system(cmd);
+}
+
+ // --- Функции обратного вызова для GUI (GTK+) ---
+
+ /**
+  * @brief Функция обратного вызова, вызываемая при нажатии одной из кнопок управления сервоприводом.
+  * @param widget Указатель на виджет, вызвавший событие (в данном случае GtkButton).
+  * @param data Пользовательские данные, переданные при подключении сигнала (здесь - целевая ширина импульса).
+  */
+ void on_button_clicked(GtkWidget *widget, gpointer data) {
+     // Преобразуем gpointer (обобщенный указатель) обратно в int (ширину импульса).
+     int value = GPOINTER_TO_INT(data);
+     // Устанавливаем положение сервопривода.
+     set_servo(value);
+ }
+
+ /**
+  * @brief Функция обратного вызова, вызываемая при изменении положения ползунка (GtkScale).
+  * @param range Указатель на GtkRange (базовый тип для GtkScale), вызвавший событие.
+  * @param user_data Пользовательские данные (не используются в данной функции, NULL).
+  */
+ void on_scale_moved(GtkRange *range, gpointer user_data) {
+     // Получаем текущее значение ползунка.
+     int value = (int)gtk_range_get_value(range);
+     // Устанавливаем положение сервопривода на основе значения ползунка.
+     set_servo(value);
+ }
+
+ // --- Главная функция программы ---
+
+ /**
+  * @brief Точка входа в программу. Инициализирует GTK+, создает графический интерфейс
+  * и запускает основной цикл обработки событий.
+  * @param argc Количество аргументов командной строки.
+  * @param argv Массив строк аргументов командной строки.
+  * @return Код завершения программы (0 при успешном выполнении, 1 при ошибке).
+  */
+ int main(int argc, char *argv[]) {
+     // Инициализация библиотеки GTK+. Должна быть вызвана первой для любого GTK-приложения.
+     gtk_init(&amp;argc, &amp;argv);
+
+     // --- Создание главного окна GTK+ ---
+     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL); // Создаем новое окно верхнего уровня.
+     gtk_window_set_title(GTK_WINDOW(window), &quot;Servo SG90 Controller&quot;); // Устанавливаем заголовок окна.
+     gtk_window_set_default_size(GTK_WINDOW(window), 400, 200); // Устанавливаем размер окна по умолчанию.
+     // Устанавливаем иконку окна из файла. Путь должен быть абсолютным или относительным к месту запуска.
+     gtk_window_set_icon_from_file(GTK_WINDOW(window), &quot;/home/Alex/GUI4RPiZ2W/5/servo_gui.png&quot;, NULL);
+     // Подключаем сигнал &quot;destroy&quot; (закрытие окна) к функции gtk_main_quit.
+     // Это гарантирует, что приложение завершится при закрытии окна.
+     g_signal_connect(window, &quot;destroy&quot;, G_CALLBACK(gtk_main_quit), NULL);
+
+     // --- Создание вертикального контейнера (VBox) ---
+     // GtkBox - это контейнер, который упорядочивает виджеты в одном измерении (вертикально или горизонтально).
+     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10); // Создаем вертикальный контейнер с отступом 10 пикселей между    дочерними элементами.
+     gtk_container_add(GTK_CONTAINER(window), vbox); // Добавляем этот контейнер в главное окно.
+
+     // --- Создание горизонтального контейнера (HBox) для кнопок ---
+     GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5); // Создаем горизонтальный контейнер с отступом 5 пикселей.
+     // Упаковываем HBox в VBox. FALSE, FALSE, 0 означает: не растягивать, не заполнять, без дополнительного отступа.
+     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+
+     // --- Определение данных для кнопок ---
+     // Это анонимная структура и массив для удобного создания кнопок.
+     struct {
+         const char *label; // Текст метки кнопки
+         int value;         // Значение ширины импульса, которое будет отправлено сервоприводу при нажатии кнопки
+     } buttons[] = {
+         {&quot;&lt;&lt;&quot;, 500},   // Полностью влево
+         {&quot;&lt;&quot;, 1000},   // Немного влево
+         {&quot;Center&quot;, 1500}, // Центр
+         {&quot;&gt;&quot;, 2000},   // Немного вправо
+         {&quot;&gt;&gt;&quot;, 2500}    // Полностью вправо
+     };
+
+   // --- Создание и подключение кнопок ---
+   for (int i = 0; i &lt; 5; i++) {
+       GtkWidget *btn = gtk_button_new_with_label(buttons[i].label); // Создаем кнопку с заданной меткой.
+       // Подключаем сигнал &quot;clicked&quot; кнопки к функции on_button_clicked.
+       // GINT_TO_POINTER преобразует целочисленное значение (ширину импульса) в указатель,
+       // который будет передан в on_button_clicked через &#39;data&#39;.
+       g_signal_connect(btn, &quot;clicked&quot;, G_CALLBACK(on_button_clicked), GINT_TO_POINTER(buttons[i].value));
+       // Упаковываем кнопку в горизонтальный контейнер.
+       // TRUE, TRUE - кнопка будет растягиваться и заполнять доступное пространство.
+       // 0 - без дополнительного отступа.
+       gtk_box_pack_start(GTK_BOX(hbox), btn, TRUE, TRUE, 0);
+   }
+
+   // --- Создание ползунка (GtkScale) ---
+   // Создаем горизонтальный ползунок с диапазоном значений от 500 до 2500
+   // и шагом изменения значения 10.
+   GtkWidget *scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 500, 2500, 10);
+   gtk_scale_set_value_pos(GTK_SCALE(scale), GTK_POS_TOP); // Размещаем текущее значение ползунка сверху.
+   // Подключаем сигнал &quot;value-changed&quot; (изменение значения ползунка) к функции on_scale_moved.
+   // NULL в user_data, так как значение берется напрямую из ползунка в on_scale_moved.
+   g_signal_connect(scale, &quot;value-changed&quot;, G_CALLBACK(on_scale_moved), NULL);
+   gtk_range_set_value(GTK_RANGE(scale), 1500); // Устанавливаем начальное значение ползунка в 1500 (центр).
+   // Упаковываем ползунок в вертикальный контейнер.
+   // TRUE, TRUE - ползунок будет растягиваться и заполнять доступное пространство.
+   // 0 - без дополнительного отступа.
+   gtk_box_pack_start(GTK_BOX(vbox), scale, TRUE, TRUE, 0);
+
+   // --- Отображение GUI и запуск основного цикла GTK+ ---
+   gtk_widget_show_all(window); // Отображает все виджеты, содержащиеся в окне.
+   gtk_main(); // Запускает основной цикл обработки событий GTK+.
+               // Программа будет работать, пока gtk_main_quit() не будет вызвана.
+
+   return 0; // Возвращаем 0, указывая на успешное завершение программы.
+}
+</pre></div>
+</div>
+<p>### Компиляция программы</p>
+<p>Для компиляции приложения вам потребуется установленный компилятор <cite>GCC</cite> и библиотеки <cite>gtk+-3.0</cite>.</p>
+<ol class="arabic">
+<li><p><strong>Установите необходимые библиотеки (если еще не установлены):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>update
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>libgtk-3-dev
+</pre></div>
+</div>
+</li>
+<li><p><strong>Сохраните исходный код</strong> программы в файл <cite>servo_gui.c</cite> в папке вашего проекта (например, <cite>/home/Alex/GUI4RPiZ2W/5/</cite>).</p></li>
+<li><p><strong>Скомпилируйте программу</strong> с помощью следующей команды, находясь в папке проекта:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gcc<span class="w"> </span>servo_gui.c<span class="w"> </span>-o<span class="w"> </span>servo_gui<span class="w"> </span><span class="sb">`</span>pkg-config<span class="w"> </span>--cflags<span class="w"> </span>--libs<span class="w"> </span>gtk+-3.0<span class="sb">`</span>
+</pre></div>
+</div>
+<p>Эта команда компилирует <cite>servo_gui.c</cite> и создаёт исполняемый файл с именем <cite>servo_gui</cite>. Опции <cite>pkg-config</cite> автоматически добавляют необходимые флаги компилятора и библиотеки для GTK+.</p>
+</li>
+</ol>
+<p>### Проверка иконки</p>
+<p>Убедитесь, что файл иконки <cite>servo_gui.png</cite> находится по указанному пути в вашем коде и в файле ярлыка:</p>
+<p><cite>C:UsersUserDocumentsGitHubGUI4RPiZ2W5servo_gui.png</cite></p>
+<p>Если иконка отсутствует или путь неверен, приложение запустится, но иконка отображаться не будет.</p>
+<p>### Файл ярлыка (<cite>.desktop</cite> файл)</p>
+<p>Для удобного запуска приложения из меню вашей операционной системы или с рабочего стола, создадим файл ярлыка.</p>
+<ol class="arabic">
+<li><p><strong>Создайте файл</strong> <cite>servo_gui.desktop</cite> со следующим содержимым:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[Desktop Entry]</span>
+<span class="na">Type</span><span class="o">=</span><span class="s">Application</span>
+<span class="na">Name</span><span class="o">=</span><span class="s">Servo SG90 Controller</span>
+<span class="na">Comment</span><span class="o">=</span><span class="s">Control a SG90 servo via GPIO</span>
+<span class="na">Exec</span><span class="o">=</span><span class="s">/home/Alex/GUI4RPiZ2W/5/servo_gui</span>
+<span class="na">Icon</span><span class="o">=</span><span class="s">/home/Alex/GUI4RPiZ2W/5/servo_gui.png</span>
+<span class="na">Terminal</span><span class="o">=</span><span class="s">false</span>
+<span class="na">Categories</span><span class="o">=</span><span class="s">Utility</span><span class="c1">;Education;Robotics;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Сохраните этот файл</strong> в директории, предназначенной для пользовательских ярлыков:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>/home/Alex/GUI4RPiZ2W/5/servo_gui.desktop<span class="w"> </span>~/.local/share/applications/servo_gui.desktop
+</pre></div>
+</div>
+<p>Это поместит ярлык в место, где система сможет его найти и добавить в меню приложений.</p>
+</li>
+<li><p><strong>Сделайте файл ярлыка исполняемым</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>chmod<span class="w"> </span>+x<span class="w"> </span>~/.local/share/applications/servo_gui.desktop
+</pre></div>
+</div>
+<p>Это необходимо, чтобы система могла выполнить файл ярлыка.</p>
+</li>
+</ol>
+<p>После выполнения этих шагов, «Servo SG90 Controller» должен появиться в вашем меню приложений (например, в категории «Утилиты» или «Робототехника»).</p>
+<p>—</p>
+</section>
+<section id="pigpiod">
+<h2>Особенности запуска <cite>pigpiod</cite><a class="headerlink" href="#pigpiod" title="Permalink to this heading"></a></h2>
+<p>Как было упомянуто, для работы команд <cite>pigs</cite> (и соответственно нашего GUI-приложения, которое их использует через <cite>system()</cite>) необходимо, чтобы демон <cite>pigpiod</cite> был запущен.</p>
+<p>Мы решили эту задачу, настроив запуск <cite>pigpiod</cite> через <cite>crontab</cite> при загрузке системы. Это гарантирует, что сокет <cite>pigs</cite> всегда доступен.</p>
+<div class="admonition note">
+<p class="admonition-title">Примечание</p>
+<p>Важно убедиться, что <cite>pigpiod</cite> действительно запущен. Вы можете проверить его статус командой <cite>systemctl status pigpiod</cite> или просто попробовать выполнить любую команду <cite>pigs</cite> в терминале. Если демон не запущен, команды <cite>pigs</cite> не будут работать, и наше приложение не сможет управлять сервоприводом.</p>
+</div>
+<p>—</p>
+</section>
+<section id="id3">
+<h2>Выводы<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h2>
+<p>Сервопривод SG90 — это простой и удобный способ управления механикой на Raspberry Pi. Благодаря интерфейсу <cite>pigpio</cite> и утилите <cite>pigs</cite>, мы можем добиться точного управления углом поворота. Создание графического интерфейса с GTK+ значительно упрощает взаимодействие с сервоприводом, предоставляя интуитивно понятные элементы управления, такие как кнопки для предустановленных положений и ползунок для точного позиционирования.</p>
+<p>—</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Нижняя область">
+        <a href="../chapter05/index.html" class="btn btn-neutral float-left" title="Глава 5: Управление зуммером с помощью GTK+ и libgpiod" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Предыдущая</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alex Malachevsky.</p>
+  </div>
+
+  Собрано при помощи <a href="https://www.sphinx-doc.org/">Sphinx</a> с использованием
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы,</a>
+    предоставленной <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
