@@ -16,6 +16,7 @@ Welcome to GUI_for_Zero2W's documentation!
    chapter04/index
    chapter05/index
    chapter06/index
+   chapter07/index
    
 Indices and tables
 ==================

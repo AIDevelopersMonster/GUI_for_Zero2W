@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ru" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Глава 7. Графический интерфейс для работы с LCD1602 (I²C) &mdash; документация GUI_for_Zero2W 0.1</title>
+      <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../static/css/theme.css" type="text/css" />
+  
+        <script data-url_root="../" id="documentation_options" src="../static/documentation_options.js"></script>
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../static/doctools.js"></script>
+        <script src="../static/sphinx_highlight.js"></script>
+        <script src="../static/translations.js"></script>
+    <script src="../static/js/theme.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
+    <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="prev" title="Глава 6. Управление сервоприводом SG90 на Raspberry Pi" href="../chapter06/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GUI_for_Zero2W
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Поиск в документации" aria-label="Поиск в документации" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Меню навигации">
+              <p class="caption" role="heading"><span class="caption-text">Содержание:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../chapter01/index.html">Глава 1: Начало работы</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter02/index.html">Глава 2: Реакция на кнопку и тревожный индикатор</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter03/index.html">Глава 3: Игра „Двоичное Число“ и GPIO-индикация</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter04/index.html">Глава 4: RGB LED Controller (GTK + pigpio)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter05/index.html">Глава 5: Управление зуммером с помощью GTK+ и libgpiod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapter06/index.html">Глава 6. Управление сервоприводом SG90 на Raspberry Pi</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Глава 7. Графический интерфейс для работы с LCD1602 (I²C)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Цель</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">Подключение</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">Исходные файлы</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gui">Функциональность GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lcd-gui-c">Файл: <cite>lcd_gui.c</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#makefile">Файл: <cite>Makefile</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">Пример использования</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">Заключение</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Меню навигации для мобильных устройств" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GUI_for_Zero2W</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Навигация по страницам">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Глава 7. Графический интерфейс для работы с LCD1602 (I²C)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../sources/chapter07/index.rst.txt" rel="nofollow"> Просмотреть исходный код страницы</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lcd1602-i2c">
+<h1>Глава 7. Графический интерфейс для работы с LCD1602 (I²C)<a class="headerlink" href="#lcd1602-i2c" title="Permalink to this heading"></a></h1>
+<p>В этой главе мы разработаем и подключим графический интерфейс (GUI) для вывода текстовой информации на дисплей <strong>LCD1602</strong>, подключённый по интерфейсу <strong>I²C</strong> к Raspberry Pi Zero 2W.</p>
+<section id="id1">
+<h2>Цель<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<p>Создать удобный GTK-интерфейс, позволяющий:</p>
+<ul class="simple">
+<li><p>Вводить произвольный текст в две строки</p></li>
+<li><p>Отправлять его на LCD1602 нажатием кнопки</p></li>
+<li><p>Управлять очисткой экрана</p></li>
+<li><p>Тестировать инициализацию дисплея и отображать статус</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>Подключение<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
+<p>LCD1602 должен быть подключён к I²C-шине Raspberry Pi:</p>
+<ul class="simple">
+<li><p><strong>SCL1</strong> → GPIO3 (Physical pin 5)</p></li>
+<li><p><strong>SDA1</strong> → GPIO2 (Physical pin 3)</p></li>
+<li><p><strong>VCC</strong> → 5V (Physical pin 2)</p></li>
+<li><p><strong>GND</strong> → GND (Physical pin 6)</p></li>
+</ul>
+<p>Убедитесь, что модуль I²C активирован:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>raspi-config<span class="w">  </span><span class="c1"># → Interface Options → I2C → Enable</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>i2c-tools
+i2cdetect<span class="w"> </span>-y<span class="w"> </span><span class="m">1</span><span class="w">     </span><span class="c1"># Убедитесь, что адрес (обычно 0x27) виден</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>Исходные файлы<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><cite>lcd1602.h</cite>, <cite>lcd1602.c</cite> — простой драйвер для инициализации и записи текста на LCD1602 по I²C</p></li>
+<li><p><cite>lcd_gui.c</cite> — GTK-приложение с двумя строками ввода, кнопками «Отобразить» и «Очистить экран», а также меткой статуса.</p></li>
+<li><p><cite>Makefile</cite> — сборка проекта</p></li>
+</ul>
+</section>
+<section id="gui">
+<h2>Функциональность GUI<a class="headerlink" href="#gui" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Поле ввода для строки 1</p></li>
+<li><p>Поле ввода для строки 2</p></li>
+<li><p>Кнопка <strong>Отобразить</strong> — отправляет текст на дисплей</p></li>
+<li><p>Кнопка <strong>Очистить экран</strong> — очищает содержимое дисплея</p></li>
+<li><p>Метка состояния — отображает статус инициализации и отправки текста (успешно/ошибка)</p></li>
+</ul>
+</section>
+<section id="lcd-gui-c">
+<h2>Файл: <cite>lcd_gui.c</cite><a class="headerlink" href="#lcd-gui-c" title="Permalink to this heading"></a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;gtk/gtk.h&gt;</span><span class="c1"> // Включаем библиотеку GTK+ 3 для создания графического интерфейса</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;lcd1602.h&quot;</span><span class="c1"> // Включаем наш заголовочный файл драйвера LCD1602</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @file lcd_gui.c</span>
+<span class="cm"> * @brief Пример GTK-приложения для управления дисплеем LCD1602 через I2C.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Это приложение предоставляет простой графический интерфейс пользователя (GUI)</span>
+<span class="cm"> * для ввода двух строк текста и отправки их на дисплей LCD1602.</span>
+<span class="cm"> * Оно использует драйвер lcd1602.h/lcd1602.c для взаимодействия с аппаратным обеспечением.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @note Предназначено для использования на Raspberry Pi OS с Raspberry Pi Zero 2 W.</span>
+<span class="cm"> */</span>
+
+<span class="c1">// Глобальные указатели на виджеты GtkEntry для доступа к ним из разных функций.</span>
+<span class="c1">// Это необходимо, так как мы будем получать текст из этих полей ввода.</span>
+<span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">entry_line1</span><span class="p">;</span>
+<span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">entry_line2</span><span class="p">;</span>
+<span class="c1">// Глобальный указатель на метку для отображения статуса</span>
+<span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">status_label</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Обработчик события нажатия кнопки &quot;Отправить на LCD&quot;.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Эта функция вызывается, когда пользователь нажимает кнопку &quot;Отправить на LCD&quot;.</span>
+<span class="cm"> * Она считывает текст из полей ввода, очищает дисплей и записывает на него новые строки.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param button Указатель на виджет кнопки, которая вызвала событие (не используется напрямую).</span>
+<span class="cm"> * @param user_data Пользовательские данные, переданные при подключении сигнала (не используются).</span>
+<span class="cm"> */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">on_send_clicked</span><span class="p">(</span><span class="n">GtkButton</span><span class="w"> </span><span class="o">*</span><span class="n">button</span><span class="p">,</span><span class="w"> </span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">text1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_entry_get_text</span><span class="p">(</span><span class="n">GTK_ENTRY</span><span class="p">(</span><span class="n">entry_line1</span><span class="p">));</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">text2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_entry_get_text</span><span class="p">(</span><span class="n">GTK_ENTRY</span><span class="p">(</span><span class="n">entry_line2</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// Очищаем дисплей LCD1602</span>
+<span class="w">    </span><span class="n">lcd1602_clear</span><span class="p">();</span>
+<span class="w">    </span><span class="c1">// Записываем полученные строки на дисплей</span>
+<span class="w">    </span><span class="n">lcd1602_write</span><span class="p">(</span><span class="n">text1</span><span class="p">,</span><span class="w"> </span><span class="n">text2</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Обновляем метку статуса</span>
+<span class="w">    </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">status_label</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Текст успешно отправлен на LCD.&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Обработчик события нажатия кнопки &quot;Очистить экран&quot;.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Эта функция вызывается, когда пользователь нажимает кнопку &quot;Очистить экран&quot;.</span>
+<span class="cm"> * Она очищает содержимое дисплея LCD1602.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param button Указатель на виджет кнопки, которая вызвала событие.</span>
+<span class="cm"> * @param user_data Пользовательские данные.</span>
+<span class="cm"> */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">on_clear_clicked</span><span class="p">(</span><span class="n">GtkButton</span><span class="w"> </span><span class="o">*</span><span class="n">button</span><span class="p">,</span><span class="w"> </span><span class="n">gpointer</span><span class="w"> </span><span class="n">user_data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">lcd1602_clear</span><span class="p">();</span>
+<span class="w">    </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">status_label</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Экран LCD очищен.&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Главная функция приложения.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Инициализирует GTK, инициализирует LCD, создает и настраивает GUI,</span>
+<span class="cm"> * запускает главный цикл GTK и очищает ресурсы при завершении.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param argc Количество аргументов командной строки.</span>
+<span class="cm"> * @param argv Массив аргументов командной строки.</span>
+<span class="cm"> * @return 0 при успешном завершении, 1 при ошибке инициализации LCD.</span>
+<span class="cm"> */</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Инициализация GTK. Должна быть вызвана первой в любом GTK-приложении.</span>
+<span class="w">    </span><span class="n">gtk_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">argv</span><span class="p">[]);</span>
+
+<span class="w">    </span><span class="c1">// --- Создание главного окна приложения ---</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_window_new</span><span class="p">(</span><span class="n">GTK_WINDOW_TOPLEVEL</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем новое окно верхнего уровня</span>
+<span class="w">    </span><span class="n">gtk_window_set_title</span><span class="p">(</span><span class="n">GTK_WINDOW</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;LCD1602 Controller&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Устанавливаем заголовок окна</span>
+<span class="w">    </span><span class="n">gtk_window_set_default_size</span><span class="p">(</span><span class="n">GTK_WINDOW</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span><span class="w"> </span><span class="mi">250</span><span class="p">);</span><span class="w"> </span><span class="c1">// Устанавливаем размер окна по умолчанию</span>
+<span class="w">    </span><span class="c1">// Подключаем сигнал &quot;destroy&quot; (закрытие окна) к функции gtk_main_quit,</span>
+<span class="w">    </span><span class="c1">// которая завершает главный цикл GTK и, соответственно, приложение.</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">window</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;destroy&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">gtk_main_quit</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// --- Контейнеры для виджетов ---</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">vbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_box_new</span><span class="p">(</span><span class="n">GTK_ORIENTATION_VERTICAL</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">);</span><span class="w"> </span><span class="c1">// Главный вертикальный контейнер</span>
+<span class="w">    </span><span class="n">gtk_container_add</span><span class="p">(</span><span class="n">GTK_CONTAINER</span><span class="p">(</span><span class="n">window</span><span class="p">),</span><span class="w"> </span><span class="n">vbox</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">button_box</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_box_new</span><span class="p">(</span><span class="n">GTK_ORIENTATION_HORIZONTAL</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span><span class="w"> </span><span class="c1">// Контейнер для кнопок</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">button_box</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// --- Создание и добавление поля ввода для первой строки ---</span>
+<span class="w">    </span><span class="n">entry_line1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_entry_new</span><span class="p">();</span><span class="w"> </span><span class="c1">// Создаем новое поле ввода текста</span>
+<span class="w">    </span><span class="c1">// Устанавливаем текст-заполнитель, который отображается, когда поле пустое</span>
+<span class="w">    </span><span class="n">gtk_entry_set_placeholder_text</span><span class="p">(</span><span class="n">GTK_ENTRY</span><span class="p">(</span><span class="n">entry_line1</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Текст первой строки (до 16 символов)&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Добавляем поле ввода в контейнер vbox.</span>
+<span class="w">    </span><span class="c1">// FALSE, FALSE, 0 означает, что виджет не будет расширяться и заполнять доступное пространство.</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">entry_line1</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// --- Создание и добавление поля ввода для второй строки ---</span>
+<span class="w">    </span><span class="n">entry_line2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_entry_new</span><span class="p">();</span><span class="w"> </span><span class="c1">// Создаем новое поле ввода текста</span>
+<span class="w">    </span><span class="n">gtk_entry_set_placeholder_text</span><span class="p">(</span><span class="n">GTK_ENTRY</span><span class="p">(</span><span class="n">entry_line2</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Текст второй строки (до 16 символов)&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">entry_line2</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// --- Кнопка &quot;Отобразить&quot; ---</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">send_button</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_button_new_with_label</span><span class="p">(</span><span class="s">&quot;Отобразить&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Создаем кнопку с текстом</span>
+<span class="w">    </span><span class="c1">// Подключаем сигнал &quot;clicked&quot; (нажатие кнопки) к нашей функции on_send_clicked</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">send_button</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;clicked&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">on_send_clicked</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">button_box</span><span class="p">),</span><span class="w"> </span><span class="n">send_button</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем в контейнер кнопок</span>
+
+<span class="w">    </span><span class="c1">// --- Кнопка &quot;Очистить экран&quot; ---</span>
+<span class="w">    </span><span class="n">GtkWidget</span><span class="w"> </span><span class="o">*</span><span class="n">clear_button</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_button_new_with_label</span><span class="p">(</span><span class="s">&quot;Очистить экран&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">g_signal_connect</span><span class="p">(</span><span class="n">clear_button</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;clicked&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G_CALLBACK</span><span class="p">(</span><span class="n">on_clear_clicked</span><span class="p">),</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">button_box</span><span class="p">),</span><span class="w"> </span><span class="n">clear_button</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// Добавляем в контейнер кнопок</span>
+
+<span class="w">    </span><span class="c1">// --- Метка статуса ---</span>
+<span class="w">    </span><span class="n">status_label</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gtk_label_new</span><span class="p">(</span><span class="s">&quot;Ожидание инициализации LCD...&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gtk_box_pack_start</span><span class="p">(</span><span class="n">GTK_BOX</span><span class="p">(</span><span class="n">vbox</span><span class="p">),</span><span class="w"> </span><span class="n">status_label</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">FALSE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Инициализация LCD1602.</span>
+<span class="w">    </span><span class="c1">// Используем &quot;/dev/i2c-1&quot; для I2C-шины на Raspberry Pi и адрес 0x27 для PCF8574.</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lcd1602_init</span><span class="p">(</span><span class="s">&quot;/dev/i2c-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mh">0x27</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Если инициализация LCD не удалась, выводим сообщение об ошибке</span>
+<span class="w">        </span><span class="n">g_printerr</span><span class="p">(</span><span class="s">&quot;Ошибка инициализации LCD. Убедитесь, что I2C включен и адрес 0x27 корректен.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">status_label</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Ошибка инициализации LCD!&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// Не возвращаем 1 сразу, чтобы GUI все равно показался, но с ошибкой.</span>
+<span class="w">        </span><span class="c1">// return 1;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">gtk_label_set_text</span><span class="p">(</span><span class="n">GTK_LABEL</span><span class="p">(</span><span class="n">status_label</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;LCD успешно инициализирован.&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+
+<span class="w">    </span><span class="c1">// Показываем все виджеты в окне (окно и все его дочерние элементы)</span>
+<span class="w">    </span><span class="n">gtk_widget_show_all</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Запускаем главный цикл GTK.</span>
+<span class="w">    </span><span class="c1">// Приложение будет ожидать событий (нажатия кнопок, ввод текста и т.д.)</span>
+<span class="w">    </span><span class="c1">// до тех пор, пока не будет вызвана gtk_main_quit (например, при закрытии окна).</span>
+<span class="w">    </span><span class="n">gtk_main</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// После завершения главного цикла GTK, закрываем I2C-соединение с LCD.</span>
+<span class="w">    </span><span class="n">lcd1602_close</span><span class="p">();</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// Успешное завершение программы</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="makefile">
+<h2>Файл: <cite>Makefile</cite><a class="headerlink" href="#makefile" title="Permalink to this heading"></a></h2>
+<div class="highlight-makefile notranslate"><div class="highlight"><pre><span></span><span class="c"># @file Makefile</span>
+<span class="c"># @brief Makefile для сборки GTK-приложения и драйвера LCD1602.</span>
+<span class="c">#</span>
+<span class="c"># Этот Makefile автоматизирует процесс компиляции исходных файлов C</span>
+<span class="c"># (lcd_gui.c и lcd1602.c) и компоновки их в исполняемый файл &#39;lcd_gui&#39;.</span>
+<span class="c"># Он использует pkg-config для автоматического определения флагов компиляции и</span>
+<span class="c"># библиотек GTK+ 3.</span>
+<span class="c">#</span>
+<span class="c"># @note Предназначен для использования на системах с установленным GTK+ 3 и GCC.</span>
+
+<span class="c"># Компилятор C</span>
+<span class="nv">CC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>gcc
+
+<span class="c"># Флаги компилятора:</span>
+<span class="c"># `pkg-config --cflags gtk+-3.0` - автоматически добавляет необходимые флаги для заголовочных файлов GTK+ 3.</span>
+<span class="c"># -Wall - включает все предупреждения компилятора, что помогает писать более чистый и безопасный код.</span>
+<span class="nv">CFLAGS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`</span>pkg-config<span class="w"> </span>--cflags<span class="w"> </span>gtk+-3.0<span class="sb">`</span><span class="w"> </span>-Wall
+
+<span class="c"># Библиотеки для компоновки:</span>
+<span class="c"># `pkg-config --libs gtk+-3.0` - автоматически добавляет необходимые библиотеки GTK+ 3 для компоновки.</span>
+<span class="nv">LIBS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`</span>pkg-config<span class="w"> </span>--libs<span class="w"> </span>gtk+-3.0<span class="sb">`</span>
+
+<span class="c"># Цель по умолчанию: &#39;all&#39;. При вызове &#39;make&#39; без аргументов, будет выполнена эта цель.</span>
+<span class="nf">all</span><span class="o">:</span><span class="w"> </span><span class="n">lcd_gui</span>
+
+<span class="c"># Цель &#39;lcd_gui&#39;: Компонует объектные файлы в конечный исполняемый файл.</span>
+<span class="c"># Зависимости: lcd_gui.o и lcd1602.o (объектные файлы).</span>
+<span class="nf">lcd_gui</span><span class="o">:</span><span class="w"> </span><span class="n">lcd_gui</span>.<span class="n">o</span> <span class="n">lcd</span>1602.<span class="n">o</span>
+<span class="w">    </span><span class="k">$(</span>CC<span class="k">)</span><span class="w"> </span>-o<span class="w"> </span>lcd_gui<span class="w"> </span>lcd_gui.o<span class="w"> </span>lcd1602.o<span class="w"> </span><span class="k">$(</span>LIBS<span class="k">)</span>
+
+<span class="c"># Цель &#39;lcd_gui.o&#39;: Компилирует lcd_gui.c в объектный файл lcd_gui.o.</span>
+<span class="c"># Зависимости: lcd_gui.c и lcd1602.h (если lcd1602.h изменится, lcd_gui.c будет перекомпилирован).</span>
+<span class="nf">lcd_gui.o</span><span class="o">:</span><span class="w"> </span><span class="n">lcd_gui</span>.<span class="n">c</span> <span class="n">lcd</span>1602.<span class="n">h</span>
+<span class="w">    </span><span class="k">$(</span>CC<span class="k">)</span><span class="w"> </span><span class="k">$(</span>CFLAGS<span class="k">)</span><span class="w"> </span>-c<span class="w"> </span>lcd_gui.c<span class="w"> </span>-o<span class="w"> </span>lcd_gui.o
+
+<span class="c"># Цель &#39;lcd1602.o&#39;: Компилирует lcd1602.c в объектный файл lcd1602.o.</span>
+<span class="c"># Зависимости: lcd1602.c и lcd1602.h.</span>
+<span class="nf">lcd1602.o</span><span class="o">:</span><span class="w"> </span><span class="n">lcd</span>1602.<span class="n">c</span> <span class="n">lcd</span>1602.<span class="n">h</span>
+<span class="w">    </span><span class="k">$(</span>CC<span class="k">)</span><span class="w"> </span>-c<span class="w"> </span>lcd1602.c
+
+<span class="c"># Цель &#39;clean&#39;: Удаляет все сгенерированные объектные файлы и исполняемый файл.</span>
+<span class="c"># Полезно для &quot;чистой&quot; пересборки проекта.</span>
+<span class="nf">clean</span><span class="o">:</span>
+<span class="w">    </span>rm<span class="w"> </span>-f<span class="w"> </span>*.o<span class="w"> </span>lcd_gui
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>Пример использования<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Соберите проект:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Запустите:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./lcd_gui
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Введите текст в строки и нажмите <strong>Отобразить</strong>. Нажмите <strong>Очистить экран</strong>, чтобы очистить дисплей.</p></li>
+</ol>
+<p>Результат:
+- Первая и вторая строки LCD отобразят ваш текст
+- Статус внизу покажет «Успешно отправлено» или сообщение об ошибке</p>
+</section>
+<section id="id5">
+<h2>Заключение<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h2>
+<p>Данный проект демонстрирует интеграцию <strong>GTK</strong> и <strong>I²C</strong> для управления LCD-дисплеем через дружественный графический интерфейс. Подобный подход легко расширяется — например, для отображения температуры, сетевого статуса или другой информации.</p>
+<p>В следующих главах мы рассмотрим расширение GUI и интеграцию с другими компонентами системы.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Нижняя область">
+        <a href="../chapter06/index.html" class="btn btn-neutral float-left" title="Глава 6. Управление сервоприводом SG90 на Raspberry Pi" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Предыдущая</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Alex Malachevsky.</p>
+  </div>
+
+  Собрано при помощи <a href="https://www.sphinx-doc.org/">Sphinx</a> с использованием
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">темы,</a>
+    предоставленной <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
